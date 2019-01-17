@@ -1,8 +1,11 @@
 # spectralEngergyDensity
 Python code to calculate SED for an FCC-diamond solid - python2.7
+# Content
+  # Calc
+    etc
 
-# content
-We will update this with references to papers when it's up and running
+# Relax
+
 
 # Contributors
 Riley Hadjis and
