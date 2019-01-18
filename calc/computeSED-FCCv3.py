@@ -13,15 +13,15 @@ This was written in python 2.7 installed with conda.
 ### GLOBAL VARIABLES ###
 import numpy as np #if it doesnt work, lemme know and ill tell you the versions
 import matplotlib.pyplot as plt
-import sed
+import mod
 
-sed.tic()
+mod.tic()
 
 outfile = 'sed.ty.Si'
 velsfile = 'vels.dat'
 
 n1, n2, n3 = [30,30,30] #size of simulation cell
-dk = 50 #k space mesh, number of points between speciak k points
+dk = 40 #k space mesh, number of points between speciak k points
 
 steps = 10000 #run time
 dt = 0.5e-15 #lammps time step
@@ -36,7 +36,7 @@ pi = np.pi #tired of forgetting the 'np' part...
 thz = np.arange(0,tn)/(tn*dt*dn)*1e-12 #frequency in THz
 
 #### GET POSITIONS AND UNITCELL INDICIES ###
-num, pos, masses, uc, a = sed.makeTriclinic(n1,n2,n3,element='si') 
+num, pos, masses, uc, a = mod.makeTriclinic(n1,n2,n3,element='si') 
 #get the positions from function
 types = pos[:,1]
 ###
@@ -50,11 +50,19 @@ prim[:,0] = prim[:,0]*a*np.sqrt(2.0)/4.0 #a1
 prim[:,1] = prim[:,1]*a/np.sqrt(24.0) #a2
 prim[:,2] = prim[:,2]*a/np.sqrt(3.0) #a3
 
+#specialk = np.array([[0,0,0], #gamma
+#                     [0.5,0,0.5], #X
+#                     [0.375,0.375,0.75], #K
+#                     [0,0,0], #gamma
+#                     [0.5,0.5,0.5]]) #L 
+#                     #special reciprocal lattice points
+#klabel = np.array(('G','X','K','G','L')) 
+
 specialk = np.array([[0,0,0], #gamma
-                     [0.5,0,0.5], #X
+                     [0,0.5,0.5], #X
                      [0.375,0.375,0.75], #K
                      [0,0,0], #gamma
-                     [0.5,0.5,0.5]]) #L 
+                     [0,0,0.5]]) #L 
                      #special reciprocal lattice points
 klabel = np.array(('G','X','K','G','L')) 
 
@@ -73,11 +81,11 @@ klabel = np.array(('G','X','K','G','L'))
 
 ### FIX THESE COORDS FOR NEW UNIT CELL ?
 
-kpoints, kdist = sed.makeKpoints(prim,specialk,dk) #get the input k space array
+kpoints, kdist = mod.makeKpoints(prim,specialk,dk) #get the input k space array
 #from a funtion
 
 ### GET VELOCITIES AND CALCULATE SED ###
-sed.log('\n\tCALCULATING PHONON SPECTRAL ENERGY DENSITY!',new='yes')
+mod.log('\n\tCALCULATING PHONON SPECTRAL ENERGY DENSITY!',new='yes')
 
 with open(velsfile, 'r') as fid: 
     nk = len(kpoints) #number of k points
@@ -97,7 +105,7 @@ with open(velsfile, 'r') as fid:
     #produce better data      
           
     for i in range(split): #loop over chunks to block average
-        sed.log('\n\tNow on chunk: '+str(i+1)+
+        mod.log('\n\tNow on chunk: '+str(i+1)+
               ' out of '+str(split)+'\n')
         vels = np.zeros((tn,num,3))
         qdot = np.zeros((tn,nk))
@@ -114,14 +122,14 @@ with open(velsfile, 'r') as fid:
                 vels[j,k,2] = float(tmp[4]) #vz
          
         #calculate vibrational density of states
-#        vdos = ty.vdos(vels,tn,num,dt,dn,win,thz) #wasn't working
+#        vdos = mod.vdos(vels,tn,num,dt,dn,win,thz) #wasn't working
 #        dos[:,0] = dos[:,0]+vdos[0][:]
                 
         #compute SED for this block        
         for j in range(nk): #loop over all k points
             kvec = kpoints[j,:] #k point vector
             if j%10 == 0:
-                sed.log('\t\tNow on k-point: '+str(j)+' out of '+str(nk)+'\n')
+                mod.log('\t\tNow on k-point: '+str(j)+' out of '+str(nk)+'\n')
             tmp = np.zeros((tn,3)).astype(complex) #sed for this k point
             for k in range(nc-1): #loop over unit cells
                 rvec = cellvec[k,2:5] #position of unit cell
@@ -143,8 +151,8 @@ with open(velsfile, 'r') as fid:
                     #KE of normal coordinate (square of time-FFT)
                     
         sed = sed+np.real(qdot)/(4*np.pi*steps/split*dt*nc) #a buncha constants
-        sed.writeSED(outfile+'.'+str(i)+'.dat',thz,kpoints,sed/(i+1),dos/(i+1))
-        sed.toc() #execution time
+        mod.writeSED(outfile+'.'+str(i)+'.dat',thz,kpoints,sed/(i+1),dos/(i+1))
+        mod.toc() #execution time
         
 sed = sed/split #average across splits
 dos = dos/split
@@ -154,13 +162,13 @@ del split, steps, tmp, tmpVels, types, uc, vels, velsfile, vx, vy, vz
 #clean up variables
 
 ### WRITE TO A FILE ###
-sed.writeSED(outfile+'.final.dat',thz,kpoints,sed,dos)
+mod.writeSED(outfile+'.final.dat',thz,kpoints,sed,dos)
 
-sedg = sed.smoothSED(sed,win,(thz[1]-thz[0])*np.pi*1e12)
+sedg = mod.smoothSED(sed,win,(thz[1]-thz[0])*np.pi*1e12)
 #gaussian smooth SED along freq axis for better looking results
-sed.writeSED(outfile+'.smooth.dat',thz,kpoints,sedg,dos)
+mod.writeSED(outfile+'.smooth.dat',thz,kpoints,sedg,dos)
 
-sed.log('\n\tAll done!')
+mod.log('\n\tAll done!')
 
 ### PLOT THE DISPERSION CURVE ###
 plt.imshow(sedg,cmap='jet',aspect='auto')
