@@ -1,0 +1,86 @@
+atom_style	atomic
+units		metal
+dimension	3
+boundary	p p p
+processors	* * *
+
+# ---------------------------------------------------------
+box		tilt large
+read_data       data.relax
+pair_style	tersoff
+pair_coeff	* * SiCGe.tersoff Si(D) Si(D)
+
+#--------------- Simulation control parameters ----------------------------------------------------------
+variable	Tlo equal 300
+variable	T equal 300    	          				# Kelvin
+variable	Thi equal 750
+variable	V equal vol             				# A^3
+variable	dt equal 0.0005          				# 0.5fs; in picoseconds = 1e-12 s
+variable	NRUNNVT equal 100000
+variable        NRUNNPT equal 100000
+variable	NRUNanneal equal 100000
+variable	NRUNNVE equal 100000
+variable	thermocalc equal 10000 
+variable	snapprint equal 1000 
+variable        Lx equal xhi-xlo
+variable        Ly equal yhi-ylo
+print           "Lx = ${Lx} A"
+print           "Ly = ${Ly} A"
+timestep  	${dt}
+
+# -------------- Print structure -----------------------
+dump		snapxyz all custom 100 sisnap.lammpstrj id type x y z
+
+# -------------- Relax Structure at 0K --------------------------
+thermo_style    custom step temp pe etotal press pxx pyy pzz lx ly lz fmax fnorm
+thermo		1000
+#fix		filmrelax all box/relax x 0 y 0 z 0 couple none		#Try different methods to relax different systems
+fix             filmrelax all box/relax x 0 y 0 z 0 xy 0 xz 0 yz 0 couple none         #Try different methods to relax different systems
+minimize	0.0 1e-11 100000 10000000
+min_style	sd
+min_modify	dmax 0.2
+write_restart	restart.min.*
+
+# -------------- NVT Thermalization -----------------------------
+thermo_style    custom step temp pe etotal press pxx pyy pzz lx ly lz
+dump_modify     snapxyz every ${snapprint}
+restart		500000 restart
+thermo          ${thermocalc}
+velocity	all create 750 ${SEED} mom yes rot yes dist gaussian
+fix		NVT all nvt temp 750 750 0.05 tchain 10
+run		${NRUNNVT}
+unfix		NVT
+write_restart	restart.NVT.*
+
+# ------------ Annealing -----------------------------------------
+fix             equil all langevin ${Thi} $T 0.05 ${langSEED} tally yes zero yes
+fix             NVE all nve
+run             ${NRUNanneal}
+unfix           equil
+unfix           NVE
+write_restart	restart.anneal.300.*
+
+# -------------- NVE Equilibration ----------------------------------
+fix             NVE all nve
+dump            snapNVExyz all custom ${snapprint} snap.NVE.lammpstrj id type x y z
+run             ${NRUNNVE}
+unfix           NVE
+write_restart   restart.anneal.NVE.*
+
+# ------------ Pressure Relaxation -----------------------------------------
+#fix             NPT all npt temp $T $T 0.05 x 0 0 0.5 y 0 0 0.5 z 0 0 0.5 couple none tchain 10
+fix             NPT all npt temp $T $T 0.05 x 0 0 0.5 y 0 0 0.5 z 0 0 0.5 xy 0 0 0.5 xz 0 0 0.5 yz 0 0 0.5 couple none tchain 10
+
+run             ${NRUNNPT}
+unfix           NPT
+write_restart   restart.NPT.300.*
+
+# -------------- NVE Equilibration ----------------------------------
+fix             NVE all nve
+dump            snapNVEPxyz all custom ${snapprint} snap.NVE.pressure.lammpstrj id type x y z
+run             ${NRUNNVE}
+unfix           NVE
+write_restart   restart.NVE.pressure.*
+
+write_restart   restart.final.*
+write_data	data.vels nocoeff
