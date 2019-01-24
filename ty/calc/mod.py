@@ -238,7 +238,7 @@ def makeSL(nx,ny,nz,period,lammps='no'):
         sys.exit('Period must be even integer')
     nSi = period/2
         
-    a = 5.431 
+    a = 5.431/2.0+5.658/2.0
     masses = np.array([28.0855,72.6400])
     
     basis = np.array([[0,0,0], 
