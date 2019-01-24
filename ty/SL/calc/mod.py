@@ -214,7 +214,7 @@ def makeTriclinic(n1,n2,n3,lammps='no',element='si'):
     return [num, pos, masses, uc, a] 
 
 ########################################################
-def makeSL(nx,ny,nz,period,lammps='no'):
+def makeSL(nx,ny,nz,period,lammps='no',element='si/ge'):
     """
     This function replicates a single Si/Ge superlattice period as a 
     supercell for SED calculations.
@@ -238,8 +238,15 @@ def makeSL(nx,ny,nz,period,lammps='no'):
         sys.exit('Period must be even integer')
     nSi = period/2
         
-    a = 5.431/2.0+5.658/2.0
-    masses = np.array([28.0855,72.6400])
+    if element == 'si/ge':
+        a = 5.431/2.0+5.658/2.0
+        masses = np.array([28.0855,72.6400])
+    elif element == 'si':
+        a = 5.431
+        masses = np.array([28.0855,28.0855])
+    elif element == 'ge':
+        a = 5.658
+        masses = np.array([72.6400,72.6400])
     
     basis = np.array([[0,0,0], 
                       [0,2,2],

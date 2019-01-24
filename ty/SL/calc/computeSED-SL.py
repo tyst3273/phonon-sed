@@ -20,15 +20,15 @@ mod.tic()
 outfile = 'sed.ty.SL'
 velsfile = 'vels.dat'
 
-n1, n2, n3 = [10,10,10] #size of simulation cell
+n1, n2, n3 = [16,16,16] #size of simulation cell
 period = 2 #SL period length = Lx of 1 unit cell
 dk = 50 #k space mesh, number of points between speciak k points
 
-steps = 50000 #run time
+steps = 500000 #run time
 dt = 0.5e-15 #lammps time step
 dn = 20 #print frequency
 prints = steps/dn #times data is printed
-split = 1 #times to split data for averaging
+split = 2 #times to split data for averaging
 tn = prints/split #timesteps per chunk
 win = 0.25 #gaussian smoothing window
 pi = np.pi #tired of forgetting the 'np' part...
@@ -37,7 +37,7 @@ pi = np.pi #tired of forgetting the 'np' part...
 thz = np.arange(0,tn)/(tn*dt*dn)*1e-12 #frequency in THz
 
 #### GET POSITIONS AND UNITCELL INDICIES ###
-num, pos, masses, uc, types, a = mod.makeSL(n1,n2,n3,period) 
+num, pos, masses, uc, types, a = mod.makeSL(n1,n2,n3,period,element='si')
 #get the positions from function
 ###
 
@@ -50,26 +50,18 @@ prim[:,0] = prim[:,0]*a*period #a1
 prim[:,1] = prim[:,1]*a #a2
 prim[:,2] = prim[:,2]*a #a3
 
-#specialk = np.array([[0,0,0], #gamma
-#                     [0.5,0.5,0], #X
-#                     [0.75,0.375,0.375], #K
-#                     [0,0,0], #gamma
-#                     [0.5,0.5,0.5]]) #L 
-#                     #special reciprocal lattice points
-#klabel = np.array(('G','X','K','G','L')) 
-
-#specialk = np.array([[0,0,0], #gamma
-#                     [0.5,0.5,0], #X
-#                     [0.75,0.5,0.25], #W
-#                     [0.75,0.375,0.375], #K
-#                     [0,0,0], #G
-#                     [0.5,0.5,0.5], #L
-#                     [0.625,0.625,0.25], #U
-#                     [0.75,0.5,0.25], #W
-#                     [0.5,0.5,0.5], #L
-#                     [0.75,0.375,0.375]]) #K
-#                     #special reciprocal lattice points
-#klabel = np.array(('G','X','W','K','G','L','U','W','L','K')) 
+specialk = np.array([[0,0,0], #G
+                     [0.5,0,0], #X
+                     [0.5,0.5,0], #S
+                     [0,0.5,0], #Y
+                     [0,0,0], #G
+                     [0,0,0.5], #Z
+                     [0.5,0,0.5], #U
+                     [0.5,0.5,0.5], #R
+                     [0,0.5,0.5], #T
+                     [0,0,0.5]]) #Z
+                     #special reciprocal lattice points
+klabel = np.array(('G','X','S','Y','G','Z','U','R','T','Z')) 
 
 #CALCULATE RECIPROCAL LATTICE POINTS FOR SL - ORHTORHOMBIC SUPER CELL
 
@@ -82,9 +74,10 @@ mod.log('\n\tCALCULATING PHONON SPECTRAL ENERGY DENSITY!',new='yes')
 with open(velsfile, 'r') as fid: 
     nk = len(kpoints) #number of k points
     ids = np.zeros((num))
-    nc = max(uc)+1
-    nb = len(masses)
+    nc = max(uc).astype(int)+1
+    nb = len(np.unique(types))
     ids = np.argwhere(types == 1) #atoms in this basis pos
+    ids = ids-1
     cellvec = pos[ids[:,0],:] #coords of fcc basis atom
     cellvec = cellvec[np.argsort(uc[ids][:,0]),:] #sort by unit cell
     
@@ -127,7 +120,10 @@ with open(velsfile, 'r') as fid:
                 rvec = cellvec[k,2:5] #position of unit cell
                 ids = np.argwhere(uc==k) 
                 for l in range(nb): #loop over basis atoms
-                    mass = masses[l]
+                    if pos[ids[l],1] == 1: #si
+                        mass = masses[0]
+                    else:
+                        mass = masses[1] #ge
                     vx = vels[:,ids[l,0],0] #time series for particular atom
                     vy = vels[:,ids[l,0],1] # '' ''
                     vz = vels[:,ids[l,0],2] # '' ''
