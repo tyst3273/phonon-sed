@@ -156,15 +156,16 @@ del split, steps, tmp, tmpVels, types, uc, vels, velsfile, vx, vy, vz
 ### WRITE TO A FILE ###
 mod.writeSED(outfile+'.final.dat',thz,kpoints,sed,dos)
 
-sedg = mod.smoothSED(sed,win,(thz[1]-thz[0])*np.pi*1e12)
+sedg = mod.smoothSED(sed,win,(thz[1]-thz[0])*2*np.pi*1e12)
 #gaussian smooth SED along freq axis for better looking results
 mod.writeSED(outfile+'.smooth.dat',thz,kpoints,sedg,dos)
 
 mod.log('\n\tAll done!')
 
 ### PLOT THE DISPERSION CURVE ###
-#plt.imshow(sedg,cmap='jet',aspect='auto')
-#plt.tight_layout()
-#plt.show()
+plt.imshow(np.log(sedg),interpolation='hamming',cmap='jet',aspect='auto')
+plt.tight_layout()
+plt.show()
 ###
+
 
