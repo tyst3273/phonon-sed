@@ -21,9 +21,9 @@ outfile = 'sed.ty.Si'
 velsfile = 'vels.dat'
 
 n1, n2, n3 = [24,24,24] #size of simulation cell
-dk = 10 #k space mesh, number of points between speciak k points
+dk = 30 #k space mesh, number of points between speciak k points
 
-steps = 10000 #run time
+steps = 50000 #run time
 dt = 0.5e-15 #lammps time step
 dn = 20 #print frequency
 prints = steps/dn #times data is printed
