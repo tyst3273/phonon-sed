@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 
-read = 'no'
+read = 'yes'
 win = 0.1
 cutoff = 2999
 
@@ -42,22 +42,43 @@ if read == 'yes':
     
     del win
     
-siN = si/np.sum(si,axis=0).sum()
-geN = ge/np.sum(ge,axis=0).sum()
-slN = sl/np.sum(sl,axis=0).sum()
+#    si = np.log(si)*np.log(si)*np.log(si)
+#    ge = np.log(ge)*np.log(ge)*np.log(ge)
+#    sl = np.log(sl)*np.log(sl)*np.log(sl)
+#    
+#    si = np.log(si)
+#    ge = np.log(ge)
+#    sl = np.log(sl)
+    
+#siN = si/si.max()*255
+#geN = ge/ge.max()*255
+#slN = sl/sl.max()*255
 
-bands = np.zeros((len(siN[:,0]),len(siN[0,:]),3),'uint8')
-bands[...,0] = siN*256
-bands[...,1] = geN*256
-bands[...,2] = slN*256
-
-img = Image.fromarray(bands)
-img.save('bands.png',format='png')
+#bands = np.zeros((len(siN[:,0]),len(siN[0,:]),3),'uint8')
+#bands[...,0] = siN
+#bands[...,1] = geN
+#bands[...,2] = slN
+#
+#img = Image.fromarray(bands,mode='RGB')
+#img.save('bandsReg.png',format='png')
 #img.show()
 
 
 ### PLOT ###
-#plt.imshow(np.log(slN),interpolation='hamming',cmap='jet',aspect='auto')
-#plt.tight_layout()
-#plt.show()
+fig1, ax1 = plt.subplots()
+ax1.imshow(np.log(si),interpolation='hamming',cmap='jet',aspect='equal')
+#fig1.tight_layout()
+#fig1.show()
+fig1.savefig('si.png',dpi=2500,format='png',bbox_inches='tight',pad_inches=0.1)
+             
+fig2, ax2 = plt.subplots()
+ax2.imshow(np.log(ge),interpolation='hamming',cmap='jet',aspect='equal')
+#fig2.tight_layout()
+#fig2.show()
+fig2.savefig('ge.png',dpi=2500,format='png',bbox_inches='tight',pad_inches=0.1)
 
+fig3, ax3 = plt.subplots()
+ax3.imshow(np.log(sl),interpolation='hamming',cmap='jet',aspect='equal')
+#fig3.tight_layout()
+#fig3.show()
+fig3.savefig('sl.png',dpi=2500,format='png',bbox_inches='tight',pad_inches=0.1)
