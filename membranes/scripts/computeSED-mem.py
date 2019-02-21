@@ -21,17 +21,17 @@ import makeMembrane as mm
 
 mod.tic()
 
-outfile = 'SED.mem'
+outfile = 'tmp.mem'
 velsfile = 'vels.dat'
 
 n1, n2, n3 = [50,1,1] #size of simulation cell
-dk = 50 #k space mesh, number of points between speciak k points
+dk = 10 #k space mesh, number of points between speciak k points
 
-steps = 2**18 #run time
+steps = 1000 #run time
 dt = 0.5e-15 #lammps time step
 dn = 2**5 #print frequency
 prints = steps/dn #times data is printed
-split = 1 #times to split data for averaging
+split = 2 #times to split data for averaging
 tn = prints/split #timesteps per chunk
 win = 0.25 #gaussian smoothing window
 pi = np.pi #tired of forgetting the 'np' part...
@@ -81,7 +81,7 @@ with open(velsfile, 'r') as fid:
     #together. Saves RAM space and it also 'ensemble averages' to 
     #produce better data      
           
-    for i in range(split): #loop over chunks to block average
+    for i in range(1):#split): #loop over chunks to block average
         mod.log('\n\tNow on chunk: '+str(i+1)+
               ' out of '+str(split)+'\n')
         vels = np.zeros((tn,num,3))
@@ -139,8 +139,8 @@ with open(velsfile, 'r') as fid:
 sed = sed/split #average across splits
 dos = dos/split
 
-del cellvec, i, j, k, ids, l, mass, n1, n2, n3, nb, nc, pi, prints, qdot
-del split, steps, tmp, tmpVels, types, uc, vels, velsfile, vx, vy, vz
+#del cellvec, i, j, k, ids, l, mass, n1, n2, n3, nb, nc, pi, prints, qdot
+#del split, steps, tmp, tmpVels, types, uc, vels, velsfile, vx, vy, vz
 #clean up variables
 
 ### WRITE TO A FILE ###
@@ -153,7 +153,8 @@ mod.writeSED(outfile+'.smooth.dat',thz,kpoints,sedg,dos)
 mod.log('\n\tAll done!')
 
 ### PLOT THE DISPERSION CURVE ###
-plt.imshow(np.log(np.real(sedg[:,1:nk+1])),interpolation='hamming',cmap='jet',aspect='auto')
+plt.imshow(np.log(sedg[:,1:nk+1]),
+           interpolation='hamming',cmap='jet',aspect='auto')
 plt.tight_layout()
 plt.show()
 ###

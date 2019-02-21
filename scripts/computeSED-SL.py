@@ -53,25 +53,9 @@ prim[:,0] = prim[:,0]*a*period #a1
 prim[:,1] = prim[:,1]*a #a2
 prim[:,2] = prim[:,2]*a #a3
 
-#specialk = np.array([[0,0,0], #G
-#                     [0.5,0,0], #X
-#                     [0.5,0.5,0], #S
-#                     [0,0.5,0], #Y
-#                     [0,0,0], #G
-#                     [0,0,0.5], #Z
-#                     [0.5,0,0.5], #U
-#                     [0.5,0.5,0.5], #R
-#                     [0,0.5,0.5], #T
-#                     [0,0,0.5]]) #Z
-#                     #special reciprocal lattice points
-#klabel = np.array(('G','X','S','Y','G','Z','U','R','T','Z')) 
-
 specialk = np.array([[0,0,0], #G
                      [0,0,0.5]]) #Z
 klabel = np.array(('G','Z'))
-
-
-#CALCULATE RECIPROCAL LATTICE POINTS FOR SL - ORHTORHOMBIC SUPER CELL
 
 kpoints, kdist = mod.makeKpoints(prim,specialk,dk) #get the input k space array
 #from a funtion
@@ -129,10 +113,7 @@ with open(velsfile, 'r') as fid:
                     mass = masses[0]
                 else:
                     mass = masses[1] #ge
-                for k in range(nc-1): #loop over unit cells
-                #why nc-1 ? I don't remember!
-                #for k in range(nc): #loop over unit cells
-                #I think nc is right but the sed plot -> 0 to gamma ..?
+                for k in range(nc): #loop over unit cells
 
                     rvec = cellvec[k,2:5] #position of unit cell
                     ids = np.argwhere(uc==k) 
