@@ -96,7 +96,7 @@ with open(velsfile, 'r') as fid:
     #together. Saves RAM space and it also 'ensemble averages' to 
     #produce better data      
           
-    for i in range(1):#split): #loop over chunks to block average
+    for i in range(split): #loop over chunks to block average
         mod.log('\n\tNow on chunk: '+str(i+1)+
               ' out of '+str(split)+'\n')
         vels = np.zeros((tn,num,3))
@@ -130,6 +130,10 @@ with open(velsfile, 'r') as fid:
                 else:
                     mass = masses[1] #ge
                 for k in range(nc-1): #loop over unit cells
+                #why nc-1 ? I don't remember!
+                #for k in range(nc): #loop over unit cells
+                #I think nc is right but the sed plot -> 0 to gamma ..?
+
                     rvec = cellvec[k,2:5] #position of unit cell
                     ids = np.argwhere(uc==k) 
                         
@@ -168,7 +172,7 @@ mod.writeSED(outfile+'.smooth.dat',thz,kpoints,sedg,dos)
 mod.log('\n\tAll done!')
 
 ### PLOT THE DISPERSION CURVE ###
-plt.imshow(np.log(sedg),interpolation='hamming',cmap='jet',aspect='auto')
+plt.imshow(np.log(sedg[:,1:nk+1]),interpolation='hamming',cmap='jet',aspect='auto')
 plt.tight_layout()
 plt.show()
 ###
