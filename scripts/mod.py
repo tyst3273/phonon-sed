@@ -122,13 +122,13 @@ def makeTriclinic(n1,n2,n3,lammps='no',element='si'):
     
     if element == 'si':
         a = 5.431 #Si lattice constant
-        masses = np.array([28.0855,28.0855]) #atomic mass of Si
+        masses = np.array([28.0855]) #atomic mass of Si
     if element == 'ge':
         a = 5.658 #Ge lattice constant
-        masses = np.array([72.6400,72.6400]) #atomic mass of Ge
+        masses = np.array([72.6400]) #atomic mass of Ge
     if element == 'c':
         a = 3.57 #C lattice constant
-        masses = np.array([12.0107,12.0107]) #atomic mass of C
+        masses = np.array([12.0107]) #atomic mass of C
     if (n1%2.0 != 0) and (n2%2.0 != 0) and (n3%2.0 != 0):
         sys.exit('Number of unit cells in each direction must be an even'
                  ' integer')
@@ -172,6 +172,8 @@ def makeTriclinic(n1,n2,n3,lammps='no',element='si'):
     pos[:,2] = pos[:,2]*a*np.sqrt(2.0)/4.0 #rescale coordinates
     pos[:,3] = pos[:,3]*a/np.sqrt(24.0) #rescale coordinates
     pos[:,4] = pos[:,4]*a/np.sqrt(3.0)/4.0 #rescale coordinates
+    ids = cp.deepcopy(pos[:,1])
+    pos[:,1] = 1
     
     if lammps != 'no':
         with open(lammps, 'w') as fid:
@@ -202,8 +204,7 @@ def makeTriclinic(n1,n2,n3,lammps='no',element='si'):
             fid.write(str(xy)+' '+str(xz)+' '+
                           str(yz)+' xy xz yz\n')
             fid.write('\nMasses\n')
-            for i in range(len(masses)):
-                fid.write('\n' + str(i+1) + ' ' + str(float(masses[i])))
+            fid.write('\n' + str(1) + ' ' + str(float(masses)))
             fid.write('\n\nAtoms\n\n')
             for i in range(len(pos)-1):
                 fid.write(str(int(i+1)) + ' ' + str(int(pos[i,1])) + ' ' 
@@ -213,7 +214,7 @@ def makeTriclinic(n1,n2,n3,lammps='no',element='si'):
                       + str(pos[-1,2]) + ' ' +
                     str(pos[-1,3]) + ' ' + str(pos[-1,4]))
             
-    return [num, pos, masses, uc, a] 
+    return [num, pos, masses, uc, ids, a] 
 
 ########################################################
 def makeSL(nx,ny,nz,period,lammps='no',element='si/ge'):
@@ -238,7 +239,7 @@ def makeSL(nx,ny,nz,period,lammps='no',element='si/ge'):
     #total number of unit cells in period; N_Si = N_Ge
     if period %2.0 !=0:
         sys.exit('Period must be even integer')
-    nSi = period/2
+    nSi = int(period/2)
         
     if element == 'si/ge':
         a = 5.431/2.0+5.658/2.0
@@ -514,9 +515,9 @@ def toc(logFlag='yes'):
             log("\n\tElapsed time is "+str(np.round(time.time()-
                            startTime_for_tictoc,decimals=3))+" seconds.")
         else:
-            print("\n\tElapsed time is "+
+            print(("\n\tElapsed time is "+
                   str(np.round(time.time()-
-                           startTime_for_tictoc,decimals=3))+" seconds.")
+                           startTime_for_tictoc,decimals=3))+" seconds."))
     else:
         print("\n\t\tToc: start time not set") 
         
