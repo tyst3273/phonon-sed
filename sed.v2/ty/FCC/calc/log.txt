@@ -1,0 +1,15 @@
+
+	CALCULATING PHONON SPECTRAL ENERGY DENSITY!
+	Now on chunk: 1 out of 1
+		Now on k-point: 0 out of 90
+		Now on k-point: 10 out of 90
+		Now on k-point: 20 out of 90
+		Now on k-point: 30 out of 90
+		Now on k-point: 40 out of 90
+		Now on k-point: 50 out of 90
+		Now on k-point: 60 out of 90
+		Now on k-point: 70 out of 90
+		Now on k-point: 80 out of 90
+
+	Elapsed time is 390.526 seconds.
+	All done!

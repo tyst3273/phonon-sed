@@ -1,0 +1,40 @@
+# ----------- Basic setup ----
+atom_style      atomic
+units           metal
+dimension       3
+boundary        p p p
+processors      * * *
+
+# ----------- Define lattice to use for group definitions ----
+read_data	data.vels
+variable        T equal 300           # Kelvin
+
+#----------- Define potential and useful quantities ----
+pair_style      tersoff				
+pair_coeff      * * SiCGe.tersoff Si(D) 
+timestep        0.001				##1 fs timestep
+thermo          10000
+dump		snap all atom 10000 snap.lammpstrj 
+
+# ----------- Initialize velocities ---------------- 
+velocity        all create ${T} ${SEED} mom yes rot yes dist gaussian
+
+# ----------- Equilibration and thermalization ----------------
+fix             NVT all nvt temp ${T} ${T} $(dt*100) tchain 10
+run        	200000
+unfix           NVT
+
+fix 		NVE all nve
+run		200000
+unfix		NVE
+
+
+#----------Collect Velocities---------------
+variable	dn equal 16		##2**4
+dump            vels all custom ${dn} vels.dat id type vx vy vz
+dump_modify     vels format line "%d %d %0.8g %0.8g %0.8g"
+dump_modify     vels sort id
+
+fix             NVE all nve
+#run             16777216		##2**24
+run		1048576 		##2**20
