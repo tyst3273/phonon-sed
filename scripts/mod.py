@@ -1,13 +1,18 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 This file is Ty's custom module to for the SED code: keep it in the same
 directory
 
 DATE STAMP: 02.20.2019 MM.DD.YYYY
+DATE STAMP: 04.15.2019
 
-now includes 'makeGaN'
+Now includes 'printParams,' reworked for 8 atom Si
+
 """
+import numpy as np
+import sys
+import copy as cp
 ############################################################
 def gsmooth(Raw, win, dom):
     """
@@ -21,7 +26,6 @@ def gsmooth(Raw, win, dom):
     freq[0]" = 0.002 THz. If none of this makes sense, do like I did and
     figure it our yourself ;)
     """
-    import numpy as np
     gwin = round(win*1e12*2*np.pi/dom) #number of array elements in window
     if gwin % 2 == 0: #make sure its odd sized array
         gwin = gwin+1
@@ -51,7 +55,6 @@ def smoothSED(Raw, win, dom):
     freq[0]" = 0.002 THz. If none of this makes sense, do like I did and
     figure it our yourself ;)
     """
-    import numpy as np
     gwin = round(win*1e12*2*np.pi/dom) #number of array elements in window
     if gwin % 2 == 0: #make sure its odd sized array
         gwin = gwin+1
@@ -84,7 +87,6 @@ def makeKpoints(prim,specialk,dk):
     k-space distance between each special k point - this is used later for
     plotting.
     """
-    import numpy as np
     kvec = np.zeros((3,3)) #k space vectors 
     vol = np.dot(prim[0,:],np.cross(prim[1,:],prim[2,:])) #real space cell volume
     kvec[0,:] = 2*np.pi*np.cross(prim[1,:],prim[2,:])/vol
@@ -116,10 +118,7 @@ def makeTriclinic(n1,n2,n3,lammps='no',element='si'):
     """
     See docstring for makeFCCdiamond
     """
-    import numpy as np
-    import sys
-    import copy as cp
-    
+   
     if element == 'si':
         a = 5.431 #Si lattice constant
         masses = np.array([28.0855]) #atomic mass of Si
@@ -232,10 +231,6 @@ def makeSL(nx,ny,nz,period,lammps='no',element='si/ge'):
     and Ge lattice constants. Optional argument 'lammps' is default 'no'. 
     If you want to write a lammps data file, change lammps to the file name.
     """
-    import numpy as np
-    import sys
-    import copy as cp
-
     #total number of unit cells in period; N_Si = N_Ge
     if period %2.0 !=0:
         sys.exit('Period must be even integer')
@@ -354,8 +349,6 @@ def makeGaN(nx,ny,nz,lammps='no'):
     Same as makeSL except return a & c, lattice constants for x=y and 
     z respectively
     """
-    import numpy as np
-    import copy as cp
     masses = np.array([69.723,14.007]) 
     a = 3.189 #a = b = diagonal length
     c = np.round(np.sqrt(8/3.0)*a,decimals=3) #5.185/2.0 #ideal c = sqrt(8/3)*a
@@ -439,13 +432,116 @@ def makeGaN(nx,ny,nz,lammps='no'):
 
     return [num, pos, masses, uc, ids, a, c]    
 
+########################################################
+def makeSi(nx,ny,nz,lammps='no'):
+    """
+    This function replicates a single Si/Ge superlattice period as a 
+    supercell for SED calculations.
+    5 arguments: nx, ny, nz are the number of times to replicate the supercell
+    in x, y, and z respectively. The next argument, period, is the TOTAL number
+    or unit cells in the period. 2*N_Si = 2*N_Ge = period. 
+    This function returns 5 argumnets: num is the number of atoms. pos is the
+    array containing atom ids, types, and x, y, z coords. masses are the masses
+    of the two atoms in the array, i.e. Si/Ge. ids are the ids of each atom 
+    within each unit cell. uc are the unit cell ids corresponing to each atom
+    in pos and ids. a is the lattice constant =  a_si/2.0+a_ge/2.0 = avg of Si
+    and Ge lattice constants. Optional argument 'lammps' is default 'no'. 
+    If you want to write a lammps data file, change lammps to the file name.
+    """
+    a = 5.431
+    mass = 28.0855
+    
+    basis = np.array([[0,0,0], 
+                      [0,2,2],
+                      [2,0,2],
+                      [2,2,0],
+                      [1,1,1],
+                      [3,3,1],
+                      [1,3,3],
+                      [3,1,3]]).astype(float) #8 atom conventional 
+                                              #FCC-diamond cell
+    
+    types = np.array([1,1,1,1,1,1,1,1]).reshape(8,1)
+    basis = np.append(types,basis,axis=1)
+    uc = np.zeros(8)
+    ids = np.arange(0,8)
+    
+    #replicate in x, y, z
+    pos = cp.deepcopy(basis)
+    tmp = cp.deepcopy(pos)
+    tuc = cp.deepcopy(uc)
+    tids = cp.deepcopy(ids)
+    for i in range(nx-1): #x
+        tmp[:,1] = tmp[:,1]+4
+        pos = np.append(pos,tmp,axis=0)
+        tuc[:] = tuc[:]+1
+        uc = np.append(uc,tuc[:])
+        ids = np.append(ids,tids)
+        
+    tmp = cp.deepcopy(pos)
+    tuc = cp.deepcopy(uc)
+    ucmax = uc.max()
+    tids = cp.deepcopy(ids)
+    for i in range(ny-1): #y
+        tmp[:,2] = tmp[:,2]+4
+        pos = np.append(pos,tmp,axis=0)
+        tuc[:] = tuc[:]+ucmax+1
+        uc = np.append(uc,tuc)
+        ids = np.append(ids,tids)
+        
+    tmp = cp.deepcopy(pos)
+    tuc = cp.deepcopy(uc)
+    ucmax = uc.max()
+    tids = cp.deepcopy(ids)
+    for i in range(nz-1): #z
+        tmp[:,3] = tmp[:,3]+4
+        pos = np.append(pos,tmp,axis=0)
+        tuc[:] = tuc[:]+ucmax+1
+        uc = np.append(uc,tuc)
+        ids = np.append(ids,tids)    
+    
+    num = len(pos[:,0])
+    tmp = np.arange(1,num+1).reshape(num,1)
+    pos = np.append(tmp,pos,axis=1)
+    pos[:,2] = pos[:,2]*a/4.0
+    pos[:,3] = pos[:,3]*a/4.0
+    pos[:,4] = pos[:,4]*a/4.0
+    
+    if lammps != 'no':
+        with open(lammps, 'w') as fid:
+                buff = a/8.0
+                xmax = pos[:,2].max()+buff
+                xmin = 0-buff
+                ymax = pos[:,3].max()+buff
+                ymin = 0-buff
+                zmax = pos[:,4].max()+buff
+                zmin = 0-buff 
+        
+                fid.write(str('LAMMPS pos FILE\n'))
+            
+                fid.write('\n' + str(num) + ' atoms\n')
+                fid.write('\n1 atom types\n')
+                fid.write('\n' + str(xmin)+' '+str(xmax)+' xlo'+' xhi\n')
+                fid.write(str(ymin)+' '+str(ymax)+' ylo'+' yhi\n')
+                fid.write(str(zmin)+' '+str(zmax)+' zlo'+' zhi\n')
+                fid.write('\nMasses\n')
+                fid.write('\n1 ' + str(mass))
+                fid.write('\n\nAtoms\n\n')
+                for i in range(num-1):
+                    fid.write(str(int(i+1)) + ' ' + str(int(pos[i,1])) + ' ' 
+                              + str(pos[i,2]) + ' ' +
+                            str(pos[i,3]) + ' ' + str(pos[i,4]) + '\n')
+                fid.write(str(len(pos)) +  ' ' + str(int(pos[-1,1])) + ' ' 
+                          + str(pos[-1,2]) + ' ' +
+                        str(pos[-1,3]) + ' ' + str(pos[-1,4]))
+    return [num, pos, mass, uc, ids, a]
+
 ##########################################################
 def writeSED(outfile,thz,kpoints,sed,dos):
     """
     This function is simple. It writes the frequency data array, k points, 
     SED matrix, and DOS array to file 'outfile'. Read file with readSED
     """
-    import numpy as np
     nf = len(thz)
     nk = len(kpoints[:,0])
     sed = np.reshape(sed,(nf*nk,1))
@@ -470,12 +566,11 @@ def readSED(infile):
     and DOS written to file using writeSED
     """
     with open(infile,'r') as fid:
-        import numpy as np
         nf = int(fid.readline().strip().split()[2])
         nk = int(fid.readline().strip().split()[2])
         thz = np.zeros((nf,1))
         kpoints = np.zeros((nk,3))
-        sed = np.zeros((nf*nk,1)).astype(complex)
+        sed = np.zeros((nf*nk,1)).astype(float)
         dos = np.zeros((nf,1))
         for i in range(nf):
             thz[i,0] = float(fid.readline())
@@ -483,11 +578,11 @@ def readSED(infile):
             kpoints[i,:] = fid.readline().strip().split()[:]
         kpoints = kpoints.astype(float)
         for i in range(nf*nk):
-            sed[i,0] = complex(fid.readline())
+            sed[i,0] = float(fid.readline())
         sed = np.reshape(sed,(nf,nk))
         for i in range(nf):
             dos[i,0] = float(fid.readline())
-    return thz, kpoints, sed, dos
+    return thz, kpoints, np.real(sed), dos
 
 ##########################################################            
 def tic():
@@ -508,7 +603,6 @@ def toc(logFlag='yes'):
     elapsted time will be printed to screen and optionally (by default) written
     to 'log.txt' file.
     """
-    import numpy as np
     import time
     if 'startTime_for_tictoc' in globals():
         if logFlag == 'yes':
@@ -523,23 +617,22 @@ def toc(logFlag='yes'):
         
         
 ##########################################################     
-def vdos(vels,tn,num,dt,dn,win,thz):
+def VDOS(dos,vels,tn,num,dt,dn,thz):
     """
     This function calculates vibrational density of states from EMD velocity
     data. Intended to be used adjunct to SED code. 
     """
-    import numpy as np
     vels = vels.reshape(tn,num*3)
     dos = np.zeros((tn,num*3))
     velsfft = np.fft.fft(vels,axis=0)*dt*dn
-    dos = (np.multiply(abs(velsfft),abs(velsfft))/
+    vdos = (np.multiply(abs(velsfft),abs(velsfft))/
                np.tile(np.multiply(vels,vels).mean(axis=0),(tn,1))/(tn*dt*dn))
-    dosx = gsmooth(dos[:,0::3].mean(axis=1),win,(thz[1]-thz[0])*2*np.pi*1e12)
-    dosy = gsmooth(dos[:,1::3].mean(axis=1),win,(thz[1]-thz[0])*2*np.pi*1e12)
-    dosz = gsmooth(dos[:,2::3].mean(axis=1),win,(thz[1]-thz[0])*2*np.pi*1e12)
-    dos = gsmooth(dos.mean(axis=1),win,(thz[1]-thz[0])*2*np.pi*1e12)
+    dos[:,0] = dos[:,0]+vdos.mean(axis=1) #total
+    dos[:,1] = dos[:,1]+vdos[:,0::3].mean(axis=1) #x
+    dos[:,2] = dos[:,2]+vdos[:,1::3].mean(axis=1) #y
+    dos[:,3] = dos[:,3]+vdos[:,2::3].mean(axis=1) #z
 
-    return [dos, dosx, dosy, dosz]
+    return dos
 
 ##########################################################
 def log(string,outfile='log.txt',suppress='no',new='no'):
@@ -550,11 +643,35 @@ def log(string,outfile='log.txt',suppress='no',new='no'):
     """
     if new == 'no':
         with open(outfile,'a') as fid:
-            fid.write(string)
+            fid.write(string+'\n')
     else:
         with open(outfile,'w') as fid:
-            fid.write(string)
+            fid.write(string+'\n')
     if suppress == 'no':
         print(string)
     
+def printParams(dt,dn,num,steps,split,nk,klabel):
+    """
+    Writes input data to screen and file
+    """
+    log('\tMD timestep:\t\t'+str(dt*1e15)+'\tfs')
+    log('\tVelocity stride:\t'+str(dn)+'\tsteps')
+    log('\tNo. of atoms:\t\t'+str(num)+'\t--')
+    log('\tTotal No. of steps:\t'+str(steps)+'\t--')
+    log('\tTotal time:\t\t'+str(np.round(steps*dt*1e9,2))+'\tns')
+    log('\tTotal No. of splits:\t'+str(split)+'\t--')
+    log('\tTime per split:\t\t'+str(np.round(steps/split*dt*1e12,2))+'\tps')
+    log('\tNo. of K-points:\t'+str(nk)+'\t--')
+    log('\tK-path:\t\t\t'+str(klabel))
+    log('\t-----------------------------------')
+    
+##################################################################        
+def getExp(nc,kvec,cellvec):
+    """
+    Creates array of exponential factor for every unit cell at each k point
+    """
+    exp = np.zeros(nc).astype(complex)
+    for j in range(nc):
+        exp[j] = np.exp(1j*kvec.dot(cellvec[j,2:5]))
         
+    return exp
