@@ -1,16 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Date Stamp: 02.20.2019
+Date Stamp: 04.15.2019
 
 @author: Ty Sterling <ty.sterling@colorado.edu>
 and
 Riley Hadjis
 
-Riley pointed out that my FFT was inside a loop it should have been
-outside... much faster!
+Significantly reworked. Namely, there is no longer a loop over
+unit cells. Instead, all unit cells are treated at once for each
+basis atom.
 
-This was written in python 2.7 installed with conda.
+Previously, I was erroneously summing over unit cells and
+adding the x, y, and z velocities BEFORE taking the
+absolute-value-square of the velocity FFT's... which is wrong.
+
+This version seems to match lattice dynamics results quite well!
 """
 
 ### GLOBAL VARIABLES ###
@@ -54,7 +59,7 @@ specialk = np.array([[0,0,0], #G
                      [0.5,0,0]]) #X 
 
 kpoints, kdist = mod.makeKpoints(prim,specialk,nk) #generate k points
-mod.printParams(dt,dn,num,steps,split,nk,klabel)
+mod.printParams(dt,dn,num,steps,split,nk,klabel,thz)
 #print input data to screen and log file
 
 #### GET VELOCITIES AND CALCULATE SED 

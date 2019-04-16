@@ -4,11 +4,10 @@
 This file is Ty's custom module to for the SED code: keep it in the same
 directory
 
-DATE STAMP: 02.20.2019 MM.DD.YYYY
+DATE STAMP: 02.20.2019 
 DATE STAMP: 04.15.2019
 
-Now includes 'printParams,' reworked for 8 atom Si
-
+Now includes 'printParams' and 'getEXP', reworked for 8 atom Si and GaN
 """
 import numpy as np
 import sys
@@ -650,12 +649,14 @@ def log(string,outfile='log.txt',suppress='no',new='no'):
     if suppress == 'no':
         print(string)
     
-def printParams(dt,dn,num,steps,split,nk,klabel):
+def printParams(dt,dn,num,steps,split,nk,klabel,thz):
     """
     Writes input data to screen and file
     """
     log('\tMD timestep:\t\t'+str(dt*1e15)+'\tfs')
     log('\tVelocity stride:\t'+str(dn)+'\tsteps')
+    log('\tMax frequency:\t\t'+str(np.round(thz[-1]/2,2))+'\tTHz')
+    log('\tFrequency resolution:\t'+str(np.round(thz[1]-thz[0],2))+'\tTHz')
     log('\tNo. of atoms:\t\t'+str(num)+'\t--')
     log('\tTotal No. of steps:\t'+str(steps)+'\t--')
     log('\tTotal time:\t\t'+str(np.round(steps*dt*1e9,2))+'\tns')
