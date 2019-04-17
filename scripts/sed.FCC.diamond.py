@@ -9,11 +9,11 @@ Riley Hadjis
 
 Significantly reworked. Namely, there is no longer a loop over
 unit cells. Instead, all unit cells are treated at once for each
-basis atom. 
+basis atom.
 
-Previously, I was erroneously summing over unit cells and 
-adding the x, y, and z velocities BEFORE taking the 
-absolute-value-square of the velocity FFT's... which is wrong. 
+Previously, I was erroneously summing over unit cells and
+adding the x, y, and z velocities BEFORE taking the
+absolute-value-square of the velocity FFT's... which is wrong.
 
 This version seems to match lattice dynamics results quite well!
 """
@@ -24,28 +24,25 @@ import matplotlib.pyplot as plt
 import mod
 
 mod.tic()
-mod.log('\n\t8 atom GaN, ortho cell\n\t04.15.2019\n',new='yes')
+mod.log('\n\tBulk silicon, 8 atom cubic cell\n\t04.16.2019,2**24 steps\n',new='yes')
 #description of system configuration for record keeping
 
-outfile = 'GaN'
+outfile = 'si.cubic'
 velsfile = 'vels.dat'
 
-n1, n2, n3 = [72,2,2] #size of simulation cell
-nk = 72 #k space mesh, number of points between speciak k points
+n1, n2, n3 = [50,4,4] #size of simulation cell
+nk = 50 #k space mesh, number of points between speciak k points
 
-split = 2 #times to split data for averaging
-steps = 2**22 #total run time
-dt = 0.5e-15 #lammps time step
-dn = 2**5 #print frequency
+split = 4 #times to split data for averaging
+steps = 2**24 #total run time
+dt = 1e-15 #lammps time step
+dn = 2**4 #print frequency
 prints = steps//dn #total times data is printed
 tn = prints//split #times data is printed per chunk
 thz = np.arange(0,tn)/(tn*dt*dn)*1e-12 #frequency in THz
 
 #### GET POSITIONS AND UNITCELL INDICIES ###
-num, pos, masses, uc, basis, a, c = mod.makeGaN(n1,n2,n3)
-x = a*np.sqrt(3)
-y = a
-z = c
+num, pos, mass, uc, basis, a = mod.makeSi(n1,n2,n3)
 #get the positions from function
 
 #### GET K POINTS ###
@@ -53,9 +50,9 @@ prim = np.array([[1,0,0],
                  [0,1,0],
                  [0,0,1]]).astype(float) #primitive lattice vectors
 
-prim[:,0] = prim[:,0]*x #a1
-prim[:,1] = prim[:,1]*y #a2
-prim[:,2] = prim[:,2]*z #a3
+prim[:,0] = prim[:,0]*a #a1
+prim[:,1] = prim[:,1]*a #a2
+prim[:,2] = prim[:,2]*a #a3
 
 klabel = np.array(('G','X'))
 specialk = np.array([[0,0,0], #G
@@ -97,7 +94,7 @@ with open(velsfile, 'r') as fid:
 
         ##calculate vibrational density of states
         mod.log('\n\t\tNow computing vibrational density of states...\n')
-        dos = mod.VDOS(dos,vels,tn,num,dt,dn,thz) 
+#        dos = mod.VDOS(dos,vels,tn,num,dt,dn,thz) 
         mod.toc()
                 
         ##compute SED for each block
@@ -110,19 +107,14 @@ with open(velsfile, 'r') as fid:
             
             for b in range(nb): #loop over basis atoms
                 ids = np.argwhere(basis == b)
-                elem = np.unique(pos[ids,1])
-                if elem == 1:
-                    mass = masses[0]
-                else:
-                    mass = masses[1]
                 vx = np.fft.fft(vels[:,ids,0].reshape(tn,nc)*exp,axis=0)*dt*dn 
                 vy = np.fft.fft(vels[:,ids,1].reshape(tn,nc)*exp,axis=0)*dt*dn 
                 vz = np.fft.fft(vels[:,ids,2].reshape(tn,nc)*exp,axis=0)*dt*dn
                 #scaling th FFT https://www.mathworks.com/matlabcentral/  ...
                 #answers/15770-scaling-the-fft-and-the-ifft
 
-                qdot[:,k] = (qdot[:,k]+(abs(vx.sum(axis=1))**2+
-                    abs(vy.sum(axis=1))**2+abs(vz.sum(axis=1))**2)*mass/nc)
+                qdot[:,k] = (qdot[:,k]+mass/nc*(abs(vx.sum(axis=1))**2+
+                    abs(vy.sum(axis=1))**2+abs(vz.sum(axis=1))**2))
                     
         sed = sed+qdot/(4*np.pi*dt*tn*dn) #a buncha constants
         mod.writeSED(outfile+'.'+str(i)+'.dat',thz,kpoints,sed/(i+1),dos/(i+1))

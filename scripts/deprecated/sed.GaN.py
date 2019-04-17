@@ -33,8 +33,8 @@ velsfile = 'vels.dat'
 n1, n2, n3 = [72,2,2] #size of simulation cell
 nk = 72 #k space mesh, number of points between speciak k points
 
-split = 2 #times to split data for averaging
-steps = 2**22 #total run time
+split = 1 #times to split data for averaging
+steps = 2**19 #total run time
 dt = 0.5e-15 #lammps time step
 dn = 2**5 #print frequency
 prints = steps//dn #total times data is printed
