@@ -106,6 +106,21 @@ def readData(filename):
          pos[i,:] = fid.readline().strip().split()
       
    return [natoms, ntypes, masses, pos]
+
+#############################################################
+def getMasses(ids,pos,masses):
+    """
+    This function gets the masses for all atoms in this term of the sum;
+    useful when the unit cell isn't truly periodic, e.g. in a random alloy
+    """
+    nids = len(ids)
+    massarr = np.zeros(nids)
+    for i in range(nids):
+        massarr[i] = masses[int(pos[ids[i],1]-1)] #look up mass for 
+        #each atom
+        
+    return massarr
+
 ############################################################
 def makeKpoints(prim,specialk,dk):
     """
@@ -675,6 +690,122 @@ def makeSi(nx,ny,nz,lammps='no'):
                           + str(pos[-1,2]) + ' ' +
                         str(pos[-1,3]) + ' ' + str(pos[-1,4]))
     return [num, pos, mass, uc, ids, a]
+
+
+#############################################################
+def makeSiGeAlloy(nx,ny,nz,x=0.0,lammps='no'):
+    """
+    This function replicates a single Si/Ge superlattice period as a 
+    supercell for SED calculations.
+    5 arguments: nx, ny, nz are the number of times to replicate the supercell
+    in x, y, and z respectively. The next argument, period, is the TOTAL number
+    or unit cells in the period. 2*N_Si = 2*N_Ge = period. 
+    This function returns 5 argumnets: num is the number of atoms. pos is the
+    array containing atom ids, types, and x, y, z coords. masses are the masses
+    of the two atoms in the array, i.e. Si/Ge. ids are the ids of each atom 
+    within each unit cell. uc are the unit cell ids corresponing to each atom
+    in pos and ids. a is the lattice constant =  a_si/2.0+a_ge/2.0 = avg of Si
+    and Ge lattice constants. Optional argument 'lammps' is default 'no'. 
+    If you want to write a lammps data file, change lammps to the file name.
+    """
+    a = 5.431
+    
+    if x < 0 or x >= 1: 
+        sys.exit('\tUSAGE ERROR: x, concentration of In defects, must be in \n'
+                 '\tinterval [0,1)')
+    if x == 0:
+        masses = np.array([28.0855])
+    else:
+        masses = np.array([28.0855,72.64]) 
+    
+    basis = np.array([[0,0,0], 
+                      [0,2,2],
+                      [2,0,2],
+                      [2,2,0],
+                      [1,1,1],
+                      [3,3,1],
+                      [1,3,3],
+                      [3,1,3]]).astype(float) #8 atom conventional 
+                                              #FCC-diamond cell
+    
+    types = np.array([1,1,1,1,1,1,1,1]).reshape(8,1)
+    basis = np.append(types,basis,axis=1)
+    uc = np.zeros(8)
+    ids = np.arange(0,8)
+    
+    #replicate in x, y, z
+    pos = cp.deepcopy(basis)
+    tmp = cp.deepcopy(pos)
+    tuc = cp.deepcopy(uc)
+    tids = cp.deepcopy(ids)
+    for i in range(nx-1): #x
+        tmp[:,1] = tmp[:,1]+4
+        pos = np.append(pos,tmp,axis=0)
+        tuc[:] = tuc[:]+1
+        uc = np.append(uc,tuc[:])
+        ids = np.append(ids,tids)
+        
+    tmp = cp.deepcopy(pos)
+    tuc = cp.deepcopy(uc)
+    ucmax = uc.max()
+    tids = cp.deepcopy(ids)
+    for i in range(ny-1): #y
+        tmp[:,2] = tmp[:,2]+4
+        pos = np.append(pos,tmp,axis=0)
+        tuc[:] = tuc[:]+ucmax+1
+        uc = np.append(uc,tuc)
+        ids = np.append(ids,tids)
+        
+    tmp = cp.deepcopy(pos)
+    tuc = cp.deepcopy(uc)
+    ucmax = uc.max()
+    tids = cp.deepcopy(ids)
+    for i in range(nz-1): #z
+        tmp[:,3] = tmp[:,3]+4
+        pos = np.append(pos,tmp,axis=0)
+        tuc[:] = tuc[:]+ucmax+1
+        uc = np.append(uc,tuc)
+        ids = np.append(ids,tids)    
+    
+    num = len(pos[:,0])
+    tmp = np.arange(1,num+1).reshape(num,1)
+    pos = np.append(tmp,pos,axis=1)
+    pos[:,2] = pos[:,2]*a/4.0
+    pos[:,3] = pos[:,3]*a/4.0
+    pos[:,4] = pos[:,4]*a/4.0
+    
+    if x != 0:
+        siids = np.argwhere(pos[:,1] == 1)
+        nsi = len(siids)
+        nge = int(x*nsi)
+        np.random.shuffle(siids)
+        geids = siids[0:nge]
+        pos[geids,1] = 2
+    
+    if lammps != 'no':    
+        with open(lammps,'w') as fid:
+            buff = a/8
+            fid.write('LAMMPS DATA FILE FOR SED\n')
+            fid.write('\n'+str(num)+' atoms\n')
+            fid.write('\n'+str(len(masses))+' atom types\n')
+            fid.write('\n'+str(pos[:,2].min()-buff)+' '+
+                      str(pos[:,2].max()+buff)+' xlo xhi\n')
+            fid.write(str(pos[:,3].min()-buff)+' '+str(pos[:,3].max()+buff)+
+                      ' ylo yhi\n')
+            fid.write(str(pos[:,4].min()-buff)+' '+str(pos[:,4].max()+buff)+
+                      ' zlo zhi\n')
+            fid.write('\nMasses\n\n')
+            for i in range(len(masses)):
+                fid.write(str(i+1)+' '+str(masses[i])+'\n')
+            fid.write('\nAtoms\n\n')
+            for i in range(num-1):
+                fid.write(str(int(pos[i,0]))+' '+str(int(pos[i,1]))+' '
+                          +str(pos[i,2])+' '+str(pos[i,3])+' '+
+                          str(pos[i,4])+'\n')
+            fid.write(str(int(pos[-1,0]))+' '+str(int(pos[-1,1]))+' '
+                      +str(pos[-1,2])+' '+str(pos[-1,3])+' '+str(pos[-1,4]))
+
+    return [num, pos, masses, uc, ids, a]
 
 ##########################################################
 def writeSED(outfile,thz,kpoints,sed,dos):
