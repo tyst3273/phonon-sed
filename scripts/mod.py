@@ -70,6 +70,42 @@ def smoothSED(Raw, win, dom):
         smooth[:,i] = np.convolve(Raw[:,i],gauss,mode='same')
     return smooth
 
+###############################################################
+def readData(filename):
+   """
+   Reads a LAMMPS data file and returns the no of atoms, no of types, masses 
+   of each types, and an Nx5 array containing ids, type, x, y, z coords
+   """
+   with open(filename,'r') as fid:
+   
+      for i in range(2): #skip comments
+         fid.readline()
+         
+      natoms = int(fid.readline().strip().split()[0]) #number of atoms
+      fid.readline() #skip comments
+      
+      ntypes = int(fid.readline().strip().split()[0]) #number of species
+      fid.readline() #skip comments
+      
+      boxvec = np.zeros((3,2)) #get box boundaries
+      for i in range(3):
+         boxvec[i,:] = fid.readline().strip().split()[0:2]
+      
+      for i in range(3):
+         fid.readline()
+      
+      masses = np.zeros(ntypes)
+      for i in range(ntypes): #get masses
+         masses[i] = fid.readline().strip().split()[1]
+         
+      for i in range(3): #skip comments
+         fid.readline()
+         
+      pos = np.zeros((natoms,5)) #ids, type, x, y, z
+      for i in range(natoms):
+         pos[i,:] = fid.readline().strip().split()
+      
+   return [natoms, ntypes, masses, pos]
 ############################################################
 def makeKpoints(prim,specialk,dk):
     """
