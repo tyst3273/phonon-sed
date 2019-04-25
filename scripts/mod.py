@@ -749,19 +749,21 @@ def makeAlloy(nx,ny,nz,ux=1,uy=1,uz=1,x=0.0,lammps='no'):
     tmp = cp.deepcopy(pos)
     tuc = cp.deepcopy(uc)
     tids = cp.deepcopy(ids)
+    dx = int(pos[:,1].max())+1
     for i in range(nx-1): #x
-        tmp[:,1] = tmp[:,1]+4
+        tmp[:,1] = tmp[:,1]+dx
         pos = np.append(pos,tmp,axis=0)
         tuc[:] = tuc[:]+1
         uc = np.append(uc,tuc[:])
         ids = np.append(ids,tids)
-        
+    
     tmp = cp.deepcopy(pos)
     tuc = cp.deepcopy(uc)
     ucmax = uc.max()
     tids = cp.deepcopy(ids)
+    dy = int(pos[:,2].max())+1
     for i in range(ny-1): #y
-        tmp[:,2] = tmp[:,2]+4
+        tmp[:,2] = tmp[:,2]+dy
         pos = np.append(pos,tmp,axis=0)
         tuc[:] = tuc[:]+ucmax+1
         uc = np.append(uc,tuc)
@@ -771,8 +773,9 @@ def makeAlloy(nx,ny,nz,ux=1,uy=1,uz=1,x=0.0,lammps='no'):
     tuc = cp.deepcopy(uc)
     ucmax = uc.max()
     tids = cp.deepcopy(ids)
+    dz = int(pos[:,3].max())+1
     for i in range(nz-1): #z
-        tmp[:,3] = tmp[:,3]+4
+        tmp[:,3] = tmp[:,3]+dz
         pos = np.append(pos,tmp,axis=0)
         tuc[:] = tuc[:]+ucmax+1
         uc = np.append(uc,tuc)
