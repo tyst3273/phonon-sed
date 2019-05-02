@@ -24,7 +24,7 @@ pair_coeff	1 1 0.00300253 3.3087 	## B-B; eps sigma
 pair_coeff	2 2 0.00205109 3.2174	## N-N; eps sigma
 pair_coeff	1 2 0.00248162 3.2627   ## B-N; eps_BN = (eps_B*eps_N)**.5
 
-kspace_style	pppm 1e-2
+kspace_style	pppm 1e-3
 pair_modify	shift yes
 special_bonds	lj/coul 0.0 0.0 0.0
 
