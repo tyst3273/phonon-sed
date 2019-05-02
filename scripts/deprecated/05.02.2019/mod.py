@@ -73,41 +73,40 @@ def smoothSED(Raw, win, dom):
 
 ###############################################################
 def readData(filename):
-    """
-    Reads a LAMMPS data file and returns the no of atoms, no of types, masses 
-    of each types, and an Nx5 array containing ids, type, x, y, z coords
-    """
-    nlines = sum(1 for line in open(filename,'r'))
-
-    boxvec = np.zeros((3,2))
-    with open(filename,'r') as fid:
-        for i in range(nlines):
-            tmp = fid.readline().strip().split()
-            if len(tmp) > 1 and tmp[1] == 'atoms':
-                natoms = int(tmp[0])
-            if len(tmp) > 2 and tmp[1] == 'atom' and tmp[2] == 'types':
-                ntypes = int(tmp[0])
-                masses = np.zeros(ntypes)
-            if len(tmp) > 3 and tmp[-1] == 'xhi':
-                boxvec[0,:] = tmp[0:2]
-                boxvec[1,:] = fid.readline().strip().split()[0:2]
-                boxvec[2,:] = fid.readline().strip().split()[0:2]
-            if len(tmp) > 0 and tmp[0] == 'Masses':
-                fid.readline()
-                for j in range(ntypes):
-                    masses[j] = fid.readline().strip().split()[1]
-            if len(tmp) > 0 and tmp[0] == 'Atoms':
-                fid.readline()
-                tmp = fid.readline().strip().split()
-                break
-            
-        ncol = len(tmp)
-        pos = np.zeros((natoms,ncol))
-        pos[0,:] = tmp
-        for i in range(1,natoms):
-            pos[i,:] = fid.readline().strip().split()
+   """
+   Reads a LAMMPS data file and returns the no of atoms, no of types, masses 
+   of each types, and an Nx5 array containing ids, type, x, y, z coords
+   """
+   with open(filename,'r') as fid:
+   
+      for i in range(2): #skip comments
+         fid.readline()
+         
+      natoms = int(fid.readline().strip().split()[0]) #number of atoms
+      fid.readline() #skip comments
       
-    return [natoms, ntypes, masses, pos]
+      ntypes = int(fid.readline().strip().split()[0]) #number of species
+      fid.readline() #skip comments
+      
+      boxvec = np.zeros((3,2)) #get box boundaries
+      for i in range(3):
+         boxvec[i,:] = fid.readline().strip().split()[0:2]
+      
+      for i in range(3):
+         fid.readline()
+      
+      masses = np.zeros(ntypes)
+      for i in range(ntypes): #get masses
+         masses[i] = fid.readline().strip().split()[1]
+         
+      for i in range(3): #skip comments
+         fid.readline()
+         
+      pos = np.zeros((natoms,5)) #ids, type, x, y, z
+      for i in range(natoms):
+         pos[i,:] = fid.readline().strip().split()
+      
+   return [natoms, ntypes, masses, pos]
 
 #############################################################
 def getMasses(ids,pos,masses):
@@ -816,7 +815,7 @@ def makeAlloy(nx,ny,nz,ux=1,uy=1,uz=1,x=0.0,lammps='no'):
     return [num, pos, masses, uc, ids, a]
 
 ############################################################
-def makehBN(nx,ny,ux=1,uy=1,lammps='none'):
+def makehBN(nx,ny,ux=1,uy=1,lammps='no'):
     """
     Makes a 2D hBN monolayer. The minimum unit cell is 4 atom ortho.
     Define a larger supercell using the ux and uy and the structure using
