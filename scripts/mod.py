@@ -816,7 +816,7 @@ def makeAlloy(nx,ny,nz,ux=1,uy=1,uz=1,x=0.0,lammps='no'):
     return [num, pos, masses, uc, ids, a]
 
 ############################################################
-def makehBN(nx,ny,ux=1,uy=1,lammps='none'):
+def makehBN(nx,ny,ux=1,uy=1,x=0.0,iso='N',lammps='none'):
     """
     Makes a 2D hBN monolayer. The minimum unit cell is 4 atom ortho.
     Define a larger supercell using the ux and uy and the structure using
@@ -826,6 +826,21 @@ def makehBN(nx,ny,ux=1,uy=1,lammps='none'):
     the LAMMPS data file; to use the potential in : 
     "J. Phys. Chem. Lett. 2018, 9, 1584−1591" these are needed.
     """
+    if x < 0 or x >= 1:
+        sys.exit('\tUSAGE ERROR: x, concentration of defects, must be in '
+                 'interval [0,1)')
+        
+    if x > 0:
+        if iso == 'N':
+            masses = np.array([11.009,14.003,15.000]) #masses in AMU
+        elif iso == 'B':
+            masses = np.array([11.009,14.003,10.013]) #masses in AMU
+        else:
+            sys.exit('\tUSAGE ERROR: enter either \'N\' or \'B\' for '
+                     'isotope type.')
+    else:
+        masses = np.array([11.009,14.003]) #masses in AMU
+        
     ## ORTHO UNIT CELL LATTICE VECTORS
     ax = 2.510 #2*1.255
     ay = 4.348 # 6*0.724574
@@ -836,8 +851,6 @@ def makehBN(nx,ny,ux=1,uy=1,lammps='none'):
                       [1,   1,    0.907,   1,   3,   0],   #B
                       [1,   2,   -0.907,   0,   4,   0]])  #N
                   #mol.id  #type  #charge   #x   #y   #z
-                
-    masses = np.array([10.811,14.0067]) #masses in AMU
     
     ## REPLICATE TO FORM SUPERCELL
     pos = cp.deepcopy(basis)
@@ -853,6 +866,21 @@ def makehBN(nx,ny,ux=1,uy=1,lammps='none'):
     nb = len(pos[:,0])
     uc = np.zeros(nb)
     ids = np.arange(0,nb)
+    
+    ## GENERATE DEFECTS
+    if x != 0:
+        if iso == 'N':
+            defids = np.argwhere(pos[:,1] == 2)
+            ndef = int(x*nb)
+            np.random.shuffle(defids)
+            defids = defids[:ndef]
+            pos[defids,1] = 3
+        else:
+            defids = np.argwhere(pos[:,1] == 1)
+            ndef = int(x*nb)
+            np.random.shuffle(defids)
+            defids = defids[:ndef]
+            pos[defids,1] = 3
                     
     ## REPLICATE TO FORM STRUCTURE
     tmp = cp.deepcopy(pos)
@@ -968,8 +996,13 @@ def makehBN(nx,ny,ux=1,uy=1,lammps='none'):
     for i in range(num):
         if pos[int(nl[i,0]),2] == 1:
             atype = 1
-        else:
+        elif pos[int(nl[i,0]),2] == 2:
             atype = 2
+        else:
+            if iso == 'B':
+                atype = 1
+            else:
+                atype == 2
         for j in range(3):
             angles[d,1] = atype
             angles[d,3] = i+1
@@ -991,8 +1024,13 @@ def makehBN(nx,ny,ux=1,uy=1,lammps='none'):
     for i in range(num):
         if pos[int(nl[i,0]),2] == 1:
             atype = 1
-        else:
+        elif pos[int(nl[i,0]),2] == 2:
             atype = 2
+        else:
+            if iso == 'B':
+                atype = 1
+            else:
+                atype == 2
         improp[i,1] = atype
         improp[i,2:6] = nl[i,0:4]+1
             
@@ -1169,7 +1207,7 @@ def printParams(dt,dn,num,steps,split,nk,klabel,thz):
     log('\tMD timestep:\t\t'+str(dt*1e15)+'\tfs')
     log('\tVelocity stride:\t'+str(dn)+'\tsteps')
     log('\tMax frequency:\t\t'+str(np.round(thz[-1]/2,2))+'\tTHz')
-    log('\tFrequency resolution:\t'+str(np.round(thz[1]-thz[0],2))+'\tTHz')
+    log('\tFrequency resolution:\t'+str(np.round((thz[1]-thz[0])*1e3,2))+'\tMHz')
     log('\tNo. of atoms:\t\t'+str(num)+'\t--')
     log('\tTotal No. of steps:\t'+str(steps)+'\t--')
     log('\tTotal time:\t\t'+str(np.round(steps*dt*1e9,2))+'\tns')
