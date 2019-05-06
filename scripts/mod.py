@@ -163,7 +163,7 @@ def makeKpoints(prim,specialk,dk):
              (specialk[(i+1),2]-specialk[i,2])**2) 
     kdist = np.cumsum(kdist) #cumulative distance between special k points
     
-    return [kpoints, kdist]
+    return [kpoints, kdist, len(kpoints[:,0])]
 
 ##########################################################
 def makeTriclinic(n1,n2,n3,lammps='no',element='si'):
