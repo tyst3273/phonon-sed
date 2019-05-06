@@ -32,7 +32,7 @@ pos = np.delete(pos,1,axis=1)
 pos = np.delete(pos,2,axis=1)
 ####
 
-split = 12 #times to split data for averaging
+split = 5 #times to split data for averaging
 steps = 2**20 #total run time
 dt = 1e-15 #lammps time step
 dn = 2**3 #print frequency
@@ -76,7 +76,7 @@ with open(velsfile, 'r') as fid:
     ids = np.argwhere(basis == 0) #reference atom for each unit cell
     cellvec = pos[ids[:,0],:] #coords of unit cells
     
-    for i in range(1): #split): #loop over chunks to block average
+    for i in range(split): #loop over chunks to block average
         mod.log('\n\tNow on chunk: '+str(i+1)+
               ' out of '+str(split)+'\n')
         vels = np.zeros((tn,num,3))
@@ -98,7 +98,7 @@ with open(velsfile, 'r') as fid:
 
         ##calculate vibrational density of states
         mod.log('\n\t\tNow computing vibrational density of states...\n')
-#        dos = mod.VDOS(dos,vels,tn,num,dt,dn,thz) 
+        dos = mod.VDOS(dos,vels,tn,num,dt,dn,thz) 
         mod.toc()
                 
         ##compute SED for each block
