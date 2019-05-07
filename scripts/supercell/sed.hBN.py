@@ -1,28 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Date Stamp: 04.15.2019
+Last Update: 05.06.2019
 
 @author: Ty Sterling <ty.sterling@colorado.edu>
 and
 Riley Hadjis
 
-Significantly reworked. Namely, there is no longer a loop over
-unit cells. Instead, all unit cells are treated at once for each
-basis atom. 
-
-Previously, I was erroneously summing over unit cells and 
-adding the x, y, and z velocities BEFORE taking the 
-absolute-value-square of the velocity FFT's... which is wrong. 
-
-This version seems to match lattice dynamics results quite well!
-
-This version is slightly different. The structure is a random alloy, so this
-code reads the input data file to find out the basis types; the atom type is
-needed to multiply the mode coordinate by the correct mass. 
-
-Update 05.01.2019
-    Making it work for monolayer hBN
 """
 
 ### GLOBAL VARIABLES ###
@@ -31,16 +15,16 @@ import matplotlib.pyplot as plt
 import mod
 
 mod.tic()
-mod.log('\n\thBN, 4 atom ortho cell\n\t05.01.2019\n'
-        '\tnx, ny = 72x6, supercell = 1x1\n',new='yes')
+mod.log('\n\thBN, 4 atom ortho cell\n\t05.06.2019\n'
+        '\tnx, ny =  24x24, supercell = 1x1\n',new='yes')
 #description of system configuration for record keeping
 
-outfile = 'hBN.72x6.1x1'
+outfile = 'hBN.24x24'
 velsfile = 'vels.dat'
 
-n1, n2, n3 = [72,6,1] #size of simulation cell
+n1, n2, n3 = [24,24,1] #size of simulation cell
 u1, u2, u3 = [1,1,1] #size of supercell
-nk = 72 #k space mesh, number of points between speciak k points
+ndk = 24 #k space mesh, number of points between speciak k points
 
 #### This version only
 natoms, ntypes, masses, pos = mod.readData('data.vels') 
@@ -48,7 +32,7 @@ pos = np.delete(pos,1,axis=1)
 pos = np.delete(pos,2,axis=1)
 ####
 
-split = 6 #times to split data for averaging
+split = 5 #times to split data for averaging
 steps = 2**20 #total run time
 dt = 1e-15 #lammps time step
 dn = 2**3 #print frequency
@@ -69,15 +53,20 @@ prim[:,0] = prim[:,0]*ax*u1 #a1
 prim[:,1] = prim[:,1]*ay*u2 #a2
 prim[:,2] = prim[:,2]*1 #a3
 
-klabel = np.array(('G','X'))
-specialk = np.array([[0,0,0], #G
-                     [0.5,0,0]]) #X 
+klabel = np.array(('G','X','Y','G'))
+specialk = np.array([[0,0,0],   #G
+                     [0.5,0,0], #X
+                     [0,0.5,0], #Y
+                     [0,0,0]])  #G
 
-kpoints, kdist = mod.makeKpoints(prim,specialk,nk) #generate k points
+kpoints, kdist, nk = mod.makeKpoints(prim,specialk,ndk) #generate k points
 mod.printParams(dt,dn,num,steps,split,nk,klabel,thz)
 #print input data to screen and log file
 
-#### GET VELOCITIES AND CALCULATE SED 
+#### GET VELOCITIES AND CALCULATE SED ###############
+# You shouldn't have to change anything below here!!!
+######################################################
+
 sed = np.zeros((tn,nk)) #spectral energy density
 dos = np.zeros((tn,4)) #total, x, y, z
 with open(velsfile, 'r') as fid: 
