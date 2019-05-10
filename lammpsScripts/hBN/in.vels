@@ -24,7 +24,17 @@ pair_coeff	1 1 0.00300253 3.3087 	## B-B; eps sigma
 pair_coeff	2 2 0.00205109 3.2174	## N-N; eps sigma
 pair_coeff	1 2 0.00248162 3.2627   ## B-N; eps_BN = (eps_B*eps_N)**.5
 
-kspace_style	pppm 1e-3
+##-----------B-10 isotope impurities
+pair_coeff	1 3 0.00300253 3.3087 	## B-B10; eps sigma
+pair_coeff	2 3 0.00248162 3.2627   ## B10-N; eps_BN = (eps_B*eps_N)**.5
+pair_coeff      3 3 0.00300253 3.3087   ## B10-B10; eps sigma
+
+##-----------N-15 isotope impurities
+#pair_coeff	2 3 0.00205109 3.2174	## N-N15; eps sigma
+#pair_coeff	1 3 0.00248162 3.2627   ## B-N15; eps_BN = (eps_B*eps_N)**.5
+#pair_coeff     3 3 0.00205109 3.2174   ## N15-N15; eps sigma
+
+kspace_style	pppm 1e-4	#Found 1e-4 minimum required to conserve energy. 
 pair_modify	shift yes
 special_bonds	lj/coul 0.0 0.0 0.0
 
