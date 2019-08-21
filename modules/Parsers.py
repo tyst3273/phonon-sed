@@ -171,7 +171,7 @@ class parse_input:
                     print_error('EIGVECS_FILE')
                 if not os.path.exists(self.eigvecs_file):
                     print('\nERROR: file {} not found\n'.format(self.eigvecs_file))
-                    exit()
+#                    exit()
 
             # unknown options
 #            else: 

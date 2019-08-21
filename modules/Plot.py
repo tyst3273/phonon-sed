@@ -43,7 +43,7 @@ def plot_bands(sed_avg,qpoints,thz):
 
     fig.suptitle(r'$\Phi$($\bfq$,$\omega)$',y=0.95,fontsize='x-large')
 
-    #plt.savefig('example.png',format='png',dpi=300,bbox_inches='tight')
+    plt.savefig('example.png',format='png',dpi=300,bbox_inches='tight')
 
     plt.show()
 
