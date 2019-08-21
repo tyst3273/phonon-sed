@@ -110,11 +110,21 @@ class parse_input:
                     print_error('DEBUG')
 
             # plot old run
-            elif txt[0] == 'PLOT_PREVIOUS':
+            elif txt[0] == 'PLOT_BANDS':
                 try:
-                    self.plot_previous = bool(int(txt[txt.index('=')+1]))
+                    self.plot_bands = bool(int(txt[txt.index('=')+1]))
                 except:
-                    print_error('PLOT_PREVIOUS')
+                    print_error('PLOT_BANDS')
+            elif txt[0] == 'PLOT_SLICE':
+                try:
+                    self.plot_slice = bool(int(txt[txt.index('=')+1]))
+                except:
+                    print_error('PLOT_SLICE')
+            elif txt[0] == 'Q_SLICE':
+                try:
+                    self.q_slice = list(map(float,txt[txt.index('=')+1:txt.index('=')+4]))
+                except:
+                    print_error('Q_SLICE')
 
             # file names
             elif txt[0] == 'FILE_FORMAT':
@@ -155,9 +165,9 @@ class parse_input:
                     exit()
 
             # unknown options
-            else: 
-                print('\nERROR: option {} not recognized\n'.format(txt[0]))
-                exit()
+#            else: 
+#                print('\nERROR: option {} not recognized\n'.format(txt[0]))
+#                exit()
 
 def parse_lattice_file(params):
 

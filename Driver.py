@@ -20,17 +20,22 @@ import Plot
 input_file = 'INPUT'
 params = Parsers.parse_input(input_file)
 
-if params.plot_previous:
+if params.plot_bands:
     sed_avg, qpoints, thz = FileIO.read_previous(params)
-    Plot.plot_sed(sed_avg,qpoints,thz)
+    Plot.plot_bands(sed_avg,qpoints,thz)
+    if not params.plot_slice:
+        exit()
+if params.plot_slice:
+    sed_avg, qpoints, thz = FileIO.read_previous(params)
+    Plot.plot_slice(sed_avg,qpoints,thz,params.q_slice)
     exit()
-
 if params.compress:
     Compressor.compress(params)
     exit()
-params.database = h5py.File(params.database_file,'r')
 
+params.database = h5py.File(params.database_file,'r')
 lattice = Lattice.lattice(params)
+
 phonons = Phonons.spectral_energy_density(params)
 phonons.compute_sed(params,lattice)
 
