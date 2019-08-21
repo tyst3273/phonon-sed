@@ -13,6 +13,9 @@ class parse_input:
         self.compress = False
         self.debug = False
         self.plot_previous = False
+        self.plot_slice = False
+        self.slice = [0.0, 0.0, 0.0]
+        self.num_bins = 1
         self.out_prefix = 'last-run'
         self.vels_file = 'vels.dat'
         self.pos_file = 'pos.dat'
@@ -109,7 +112,7 @@ class parse_input:
                 except:
                     print_error('DEBUG')
 
-            # plot old run
+            # plotting
             elif txt[0] == 'PLOT_BANDS':
                 try:
                     self.plot_bands = bool(int(txt[txt.index('=')+1]))
@@ -125,6 +128,12 @@ class parse_input:
                     self.q_slice = list(map(float,txt[txt.index('=')+1:txt.index('=')+4]))
                 except:
                     print_error('Q_SLICE')
+            elif txt[0] == 'NUM_BINS':
+                try:
+                    self.num_bins = int(txt[txt.index('=')+1]) 
+                except:
+                    print_error('NUM_BINS')
+
 
             # file names
             elif txt[0] == 'FILE_FORMAT':

@@ -32,6 +32,6 @@ EIGVECS_FILE = 'band.yaml' # 'eigvecs.dat'
 DEBUG = 0
 
 # Read from output file (prefix above) and plot
-PLOT_BANDS = 1
+PLOT_BANDS = 0
 PLOT_SLICE = 1
-Q_SLICE    = 0.45 0.0 0.0
+Q_SLICE    = 0.25 0.0 0.0
