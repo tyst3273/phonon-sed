@@ -8,7 +8,7 @@ def write_output(phonons,params,lattice):
 
 def read_previous(params):
     sed_avg = np.loadtxt(params.out_prefix+'.pSED')
-#   pdos =  np.loadtxt(params.out_prefix+'.PDoS')
+#    pdos =  np.loadtxt(params.out_prefix+'.PDoS')
     qpoints = np.loadtxt(params.out_prefix+'.Qpts')
     thz = np.loadtxt(params.out_prefix+'.THz')
 

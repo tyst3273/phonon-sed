@@ -134,7 +134,6 @@ class parse_input:
                 except:
                     print_error('NUM_BINS')
 
-
             # file names
             elif txt[0] == 'FILE_FORMAT':
                 try:
@@ -172,8 +171,7 @@ class parse_input:
                 if not os.path.exists(self.eigvecs_file):
                     print('\nERROR: file {} not found\n'.format(self.eigvecs_file))
 #                    exit()
-
-            # unknown options
+#            # unknown options
 #            else: 
 #                print('\nERROR: option {} not recognized\n'.format(txt[0]))
 #                exit()
