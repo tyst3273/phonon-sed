@@ -32,13 +32,24 @@ def plot_bands(sed_avg,qpoints,thz):
     ax.set_yticks(ids)
     ax.set_yticklabels(list(map(str,freqs)))
 
+    xticks = [0,len(qpoints)-1]
+    ax.set_xticks(xticks)
+    xlabels = ['']*len(xticks)
+    for i in range(len(xticks)):
+        xlabels[i] = '({:.1f},{:.1f},{:.1f})'.format(qpoints[xticks[i],0],
+                qpoints[xticks[i],1],qpoints[xticks[i],2])
+    ax.set_xticklabels(xlabels)
+    
+
     ax.minorticks_on()
-    ax.tick_params(which='both', width=1, labelsize='x-large')
+    ax.tick_params(which='both', axis='y', width=1, labelsize='large')
+    ax.tick_params(which='both', axis='x', width=1, labelsize='small',
+            labelrotation=0.0,pad=5.0)
     ax.tick_params(which='major', length=5)
     ax.tick_params(which='minor', length=3, color='k')
-    plt.tick_params(axis='x',which='both',labelbottom=False)
+#    plt.tick_params(axis='x',which='both',labelbottom=False)
 
-    ax.set_xlabel(r'$\bfq$',labelpad=8.0,fontweight='normal',fontsize='x-large')
+    ax.set_xlabel(r'$\bfq$',labelpad=5.0,fontweight='normal',fontsize='x-large')
     ax.set_ylabel(r'$\omega$ (THz)',labelpad=3.0,fontweight='normal',fontsize='x-large')
 
     fig.suptitle(r'$\Phi$($\bfq$,$\omega)$',y=0.95,fontsize='x-large')

@@ -14,6 +14,18 @@ class spectral_energy_density:
         self.steps_per_split = self.reduced_steps//params.num_splits
 
     def compute_sed(self,params,lattice):
+        """
+        To avoid a horrible mess of indentations, I broke this up into internal methods 
+        that the spectral_energy_density class calls on its self. The basic outline is as
+        follows (see ... for the formulation)
+        1. Loop over 'splits' (i.e. blocks of data for block averaging)
+            read in the vels. and pos. for each split (time average the pos. to get a 
+            constant position). Data reading is done in an other method.
+            2. Loop over q-points (have to do FT at each q-point)
+                3. Loop over basis atoms
+                    The sum over FT'ed vx-vy-vz and over all basis atoms is taken care of 
+                    in loop '3'
+        """
 
         #### DEV ####
         print('\nDEV NOTE: the FFT\'s aren\'t properly scaled yet!\n')
