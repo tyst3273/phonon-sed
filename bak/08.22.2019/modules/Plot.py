@@ -1,10 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def plot_bands(data,params):
-    sed_avg = data.sed_avg
-    qpoints = data.qpoints
-    thz = data.thz
+def plot_bands(sed_avg,qpoints,thz):
 
     log = True
     color = 'afmhot'  #'inferno'
@@ -28,8 +25,10 @@ def plot_bands(data,params):
     freqs = np.arange(0,thz.max(),df)
     nf = len(freqs)
     ids = np.zeros(nf)
+
     for i in range(nf):
         ids[i] = np.argwhere(thz <= freqs[i]).max()
+
     ax.set_yticks(ids)
     ax.set_yticklabels(list(map(str,freqs)))
 
@@ -39,7 +38,8 @@ def plot_bands(data,params):
     for i in range(len(xticks)):
         xlabels[i] = '({:.1f},{:.1f},{:.1f})'.format(qpoints[xticks[i],0],
                 qpoints[xticks[i],1],qpoints[xticks[i],2])
-    ax.set_xticklabels(xlabels)  
+    ax.set_xticklabels(xlabels)
+    
 
     ax.minorticks_on()
     ax.tick_params(which='both', axis='y', width=1, labelsize='large')
@@ -48,27 +48,26 @@ def plot_bands(data,params):
     ax.tick_params(which='major', length=5)
     ax.tick_params(which='minor', length=3, color='k')
 #    plt.tick_params(axis='x',which='both',labelbottom=False)
+
     ax.set_xlabel(r'$\bfq$',labelpad=5.0,fontweight='normal',fontsize='x-large')
     ax.set_ylabel(r'$\omega$ (THz)',labelpad=3.0,fontweight='normal',fontsize='x-large')
+
     fig.suptitle(r'$\Phi$($\bfq$,$\omega)$',y=0.95,fontsize='x-large')
 
     plt.savefig('example.png',format='png',dpi=300,bbox_inches='tight')
+
     plt.show()
 
-def plot_slice(data,params):
-    sed_avg = data.sed_avg
-    qpoints = data.qpoints
-    thz = data.thz
-    q_slice = params.q_slice
+
+
+def plot_slice(sed_avg,qpoints,thz,q_slice):
 
     log = True
+    df = 5
 
-    df = 2
     freqs = np.arange(0,thz.max(),df)
     nf = len(freqs)
     ids = np.zeros(nf)
-    for i in range(nf):
-        ids[i] = np.argwhere(thz <= freqs[i]).max()
 
     nearest = ['','','']
     nearest[0] = min(qpoints[:,0], key=lambda x:abs(x-q_slice[0]))
@@ -105,23 +104,29 @@ def plot_slice(data,params):
     else:
         ax.plot(sed_avg[:,q_ind],ls='-',lw=1,color='k',
                 marker='o',ms=2,mfc='b',mec='k',mew=1)
+    
+    for i in range(nf):
+        ids[i] = np.argwhere(thz <= freqs[i]).max()
 
-#    ax.set_xticks(ids)
-#    ax.set_xticklabels(list(map(str,freqs)))
+    ax.set_xticks(ids)
+    ax.set_xticklabels(list(map(str,freqs)))
 
     ax.minorticks_on()
     ax.tick_params(which='both', width=1, labelsize='x-large')
     ax.tick_params(which='major', length=5)
     ax.tick_params(which='minor', length=3, color='k')
+
 #    plt.tick_params(axis='x',which='both',labelbottom=False)
+
     ax.set_ylabel(r'$\Phi$($\omega)$',labelpad=30.0,fontweight='normal',
             fontsize='x-large',rotation='horizontal')
-    ax.set_xlabel('Index',labelpad=3.0,fontweight='normal',fontsize='large')
-#    ax.set_xlabel(r'$\omega$ (THz)',labelpad=3.0,fontweight='normal',fontsize='large')
+    ax.set_xlabel(r'$\omega$ (THz)',labelpad=3.0,fontweight='normal',fontsize='x-large')
+
     fig.suptitle(r'$\bfq$=({}, {}, {}), log-scale={}'
             .format(nearest[0],nearest[1],nearest[2],log),y=0.80,fontsize='x-large')
 
     #plt.savefig('example.png',format='png',dpi=300,bbox_inches='tight')
+
     plt.show()
 
     

@@ -1,9 +1,6 @@
 import numpy as np
 import os
 import h5py
-import yaml
-from yaml import CLoader as Loader
-
 
 def print_error(txt):
     print('\nERROR: value for input paramater {} seems wrong\n'.format(txt))
@@ -17,9 +14,6 @@ class parse_input:
         self.debug = False
         self.plot_previous = False
         self.plot_slice = False
-        self.with_eigs = False
-        self.num_basis = 0
-        self.basis_list = []
         self.slice = [0.0, 0.0, 0.0]
         self.num_bins = 1
         self.out_prefix = 'last-run'
@@ -111,28 +105,12 @@ class parse_input:
                 except:
                     print_error('COMPRESS')
 
-            # options
+            # debug info
             elif txt[0] == 'DEBUG':
                 try:
                     self.debug = bool(int(txt[txt.index('=')+1]))
                 except:
                     print_error('DEBUG')
-            elif txt[0] == 'WITH_EIGS':
-                try:
-                    self.with_eigs = bool(int(txt[txt.index('=')+1]))
-                except:
-                    print_error('WITH_EIGS')
-            elif txt[0] == 'NUM_BASIS':
-                try:
-                    self.num_basis = (int(txt[txt.index('=')+1]))
-                except:
-                    print_error('NUM_BASIS')
-            elif txt[0] == 'BASIS_LIST':
-                try:
-                    self.basis_list = list(map(int,txt[txt.index('=')+1:
-                        txt.index('=')+1+self.num_basis]))
-                except:
-                    print_error('BASIS_LIST')
 
             # plotting
             elif txt[0] == 'PLOT_BANDS':
@@ -140,11 +118,6 @@ class parse_input:
                     self.plot_bands = bool(int(txt[txt.index('=')+1]))
                 except:
                     print_error('PLOT_BANDS')
-            elif txt[0] == 'BAND_TO_PLOT':
-                try:
-                    self.band_to_plot = (int(txt[txt.index('=')+1]))
-                except:
-                    print_error('BAND_TO_PLOT')
             elif txt[0] == 'PLOT_SLICE':
                 try:
                     self.plot_slice = bool(int(txt[txt.index('=')+1]))
@@ -160,22 +133,6 @@ class parse_input:
                     self.num_bins = int(txt[txt.index('=')+1]) 
                 except:
                     print_error('NUM_BINS')
-            elif txt[0] == 'LORENTZ':
-                try:
-                    self.lorentz = bool(int(txt[txt.index('=')+1]))
-                except:
-                    print_error('LORENTZ')
-            elif txt[0] == 'NUM_GUESSES':
-                try:
-                    self.num_guesses = int(txt[txt.index('=')+1])
-                except:
-                    print_error('NUM_GUESSES')
-            elif txt[0] == 'PEAK_GUESSES':
-                try:
-                    self.peak_guesses = list(map(int,txt[txt.index('=')+1:
-                        txt.index('=')+1+self.num_guesses]))
-                except:
-                    print_error('PEAK_GUESSES')
 
             # file names
             elif txt[0] == 'FILE_FORMAT':
@@ -214,9 +171,9 @@ class parse_input:
                 if not os.path.exists(self.eigvecs_file):
                     print('\nERROR: file {} not found\n'.format(self.eigvecs_file))
 #                    exit()
-            # unknown options
-            else: 
-                print('\nERROR: option {} not recognized\n'.format(txt[0]))
+#            # unknown options
+#            else: 
+#                print('\nERROR: option {} not recognized\n'.format(txt[0]))
 #                exit()
 
 def parse_lattice_file(params):
@@ -232,47 +189,6 @@ def parse_lattice_file(params):
         masses = masses.astype(float)
 
         return atom_ids, unit_cells, basis_pos, masses
-
-class parse_eigen_vecs:
-    def __init__(self,params):
-        if params.with_eigs:
-            phonopy_data = yaml.load(open(params.eigvecs_file),Loader=Loader)
-
-            self.natom = phonopy_data['natom']
-            self.num_qpoints = phonopy_data['nqpoint']
-            self.qpoints = np.zeros((self.num_qpoints,3))
-
-            if len(params.basis_list) == 0:
-                basis_slice = np.arange(self.natom)
-            else:
-                basis_slice = sorted(params.basis_list)
-                for i in range(len(basis_slice)):
-                    basis_slice[i] = basis_slice[i]-1
-    
-            self.freq = np.zeros((self.num_qpoints,self.natom*3))
-            self.eig_vecs = np.zeros((self.num_qpoints,self.natom*3,
-                self.natom,3)).astype(complex)
-
-            for i in range(self.num_qpoints):
-                self.qpoints[i,:] = phonopy_data['phonon'][i]['q-position']
-
-                for j in range(self.natom*3):
-                    self.freq[i][j] = phonopy_data['phonon'][i]['band'][j]['frequency']
-                    for ind in basis_slice:
-                            self.eig_vecs[i,j,ind,0] = (
-                        phonopy_data['phonon'][i]['band'][j]['eigenvector'][ind][0][0]+
-                        1j*phonopy_data['phonon'][i]['band'][j]['eigenvector'][ind][0][1]
-                            )
-                            self.eig_vecs[i,j,ind,1] = (
-                        phonopy_data['phonon'][i]['band'][j]['eigenvector'][ind][1][0]+
-                        1j*phonopy_data['phonon'][i]['band'][j]['eigenvector'][ind][1][1]
-                            )
-                            self.eig_vecs[i,j,ind,2] = (
-                        phonopy_data['phonon'][i]['band'][j]['eigenvector'][ind][2][0]+
-                        1j*phonopy_data['phonon'][i]['band'][j]['eigenvector'][ind][2][1]
-                            )
-        else:
-            self.eig_vecs = []
 
 
 

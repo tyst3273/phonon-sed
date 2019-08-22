@@ -1,0 +1,37 @@
+
+# Simulation parameters
+NUM_ATOMS = 3072 
+NUM_STEPS = 1048576 # MD simulation steps
+TIME_STEP = 0.75    # femtoseconds
+
+# File names
+OUT_PREFIX   = 'cubic-si'
+LATTICE_FILE = 'lattice.dat'
+VELS_FILE    = 'vels.dat'
+POS_FILE     = 'pos.dat'
+FILE_FORMAT  = 'lammps'
+COMPRESS     = 0
+
+# Divide up the data for averaging
+STRIDE     = 32 # data only printed every 32 steps in my LAMMPS simulation
+NUM_SPLITS = 16
+
+# Crystal lattice
+LAT_PARAMS = 5.431 5.431 5.431
+PRIM_VECS  = 1.0 0.0 0.0  0.0 1.0 0.0  0.0 0.0 1.0
+
+# Q-points
+NUM_QPATHS  = 1   # number of dispersion paths to include
+NUM_QPOINTS = 12  # number of q-points in the disperion paths
+QSYM_POINTS = 0.0 0.0 0.0  0.5 0.0 0.0 
+
+# Eigenvector data ...
+EIGVECS_FILE = 'band.yaml' # 'eigvecs.dat'
+
+# Run in debug mode
+DEBUG = 0
+
+# Read from output file (prefix above) and plot
+PLOT_BANDS = 1 
+PLOT_SLICE = 1
+Q_SLICE    = 0.25 0.0 0.0

@@ -1,16 +1,21 @@
+### Post-processing and plotting
+# Read previous calculation for plotting
+PLOT_BANDS   = 0
+BAND_TO_PLOT = 0
+PLOT_SLICE   = 0
+Q_SLICE      = 0.25 0.0 0.0 
 
+# Do Lorentz fitting
+LORENTZ      = 0
+NUM_GUESSES  = 10
+PEAK_GUESSES = 101 146 316 348 503 584 674 739 781 784
+
+
+### Phonon SED calculation
 # Simulation parameters
 NUM_ATOMS = 3072 
 NUM_STEPS = 1048576 # MD simulation steps
 TIME_STEP = 0.75    # femtoseconds
-
-# File names
-OUT_PREFIX   = 'cubic-si'
-LATTICE_FILE = 'lattice.dat'
-VELS_FILE    = 'vels.dat'
-POS_FILE     = 'pos.dat'
-FILE_FORMAT  = 'lammps'
-COMPRESS     = 0
 
 # Divide up the data for averaging
 STRIDE     = 32 # data only printed every 32 steps in my LAMMPS simulation
@@ -23,15 +28,20 @@ PRIM_VECS  = 1.0 0.0 0.0  0.0 1.0 0.0  0.0 0.0 1.0
 # Q-points
 NUM_QPATHS  = 1   # number of dispersion paths to include
 NUM_QPOINTS = 12  # number of q-points in the disperion paths
-QSYM_POINTS = 0.0 0.0 0.0  0.5 0.0 0.0 
+QSYM_POINTS = 0.0 0.0 0.0  0.5 0.0 0.0
 
-# Eigenvector data ...
-EIGVECS_FILE = 'band.yaml' # 'eigvecs.dat'
+# Options ...
+WITH_EIGS  = 0
+DEBUG      = 0
 
-# Run in debug mode
-DEBUG = 0
 
-# Read from output file (prefix above) and plot
-PLOT_BANDS = 1 
-PLOT_SLICE = 1
-Q_SLICE    = 0.25 0.0 0.0
+### Input and output files 
+# File names
+OUT_PREFIX   = 'cubic-si'
+LATTICE_FILE = 'lattice.dat'
+EIGVECS_FILE = 'band.yaml' 
+VELS_FILE    = 'vels.dat'
+POS_FILE     = 'pos.dat'
+FILE_FORMAT  = 'lammps'
+COMPRESS     = 0
+

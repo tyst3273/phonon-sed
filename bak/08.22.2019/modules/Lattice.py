@@ -2,7 +2,7 @@ import numpy as np
 import Parsers
 
 class lattice:
-    def __init__(self,params,eigen_vectors):
+    def __init__(self,params):
 
         # read the unitcell and basis positions from a file
         self.atom_ids, self.unit_cells, self.basis_pos, self.masses = (Parsers.
@@ -22,27 +22,9 @@ class lattice:
         self.recip_vecs[0,:] = 2*np.pi*np.cross(dir_lat[1,:],dir_lat[2,:])/self.bz_vol
         self.recip_vecs[1,:] = 2*np.pi*np.cross(dir_lat[2,:],dir_lat[0,:])/self.bz_vol
         self.recip_vecs[2,:] = 2*np.pi*np.cross(dir_lat[0,:],dir_lat[1,:])/self.bz_vol
-        
-        if params.with_eigs:
-            print('\nCOMMENT: Getting q-points from PHONOPY \'{}\' file\n'
-                    .format(params.eigvecs_file))
-            params.num_qpoints = list(map(int,[eigen_vectors.num_qpoints]))
-            self.num_qpoints = list(map(int,[eigen_vectors.num_qpoints]))
-            self.reduced_qpoints = eigen_vectors.qpoints
-            self.qpoints = np.copy(self.reduced_qpoints)
-            for i in range(sum(self.num_qpoints)):
-                self.qpoints[i,:] = self.recip_vecs.dot(self.qpoints[i,:])
-        else:
-            # construct the BZ paths
-            self.construct_BZ_path(params)
 
-        print('\nThere are {} q-points to be calculated:\n'
-                    .format(sum(params.num_qpoints)))
-        for i in range(sum(params.num_qpoints)):
-            print('\t(reduced) q=({:.4f}, {:.4f}, {:.4f})'
-                    .format(self.reduced_qpoints[i,0],self.reduced_qpoints[i,1],
-                        self.reduced_qpoints[i,2]))
-        print('\n')
+        # construct the BZ paths
+        self.construct_BZ_path(params)
 
     def construct_BZ_path(self,params):
         # convert from reduced q-points
@@ -53,16 +35,13 @@ class lattice:
         # populate the BZ path-mesh with linear interpolation between points
         self.num_qpoints = params.num_qpoints
         self.qpoints = np.zeros((sum(self.num_qpoints),3)) 
-        self.reduced_qpoints = np.zeros((sum(self.num_qpoints),3))
         start = 0
         for i in range(len(self.num_qpoints)):
             end = start+self.num_qpoints[i]
-            
+
             for j in range(3):
                 self.qpoints[start:end,j] = np.linspace(self.qsym_points[i,j],
                         self.qsym_points[(i+1),j],self.num_qpoints[i],endpoint=False)
-                self.reduced_qpoints[start:end,j] = np.linspace(params.qsym_points[i,j],
-                        params.qsym_points[(i+1),j],self.num_qpoints[i],endpoint=False)
 
             start = start+self.num_qpoints[i]
                  
