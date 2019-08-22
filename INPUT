@@ -1,8 +1,8 @@
 ### Post-processing and plotting
 # Read previous calculation for plotting
-PLOT_BANDS   = 0
+PLOT_BANDS   = 1
 BAND_TO_PLOT = 0
-PLOT_SLICE   = 0
+PLOT_SLICE   = 1
 Q_SLICE      = 0.25 0.0 0.0 
 
 # Do Lorentz fitting
@@ -19,7 +19,7 @@ TIME_STEP = 0.75    # femtoseconds
 
 # Divide up the data for averaging
 STRIDE     = 32 # data only printed every 32 steps in my LAMMPS simulation
-NUM_SPLITS = 16
+NUM_SPLITS = 32
 
 # Crystal lattice
 LAT_PARAMS = 5.431 5.431 5.431
@@ -32,7 +32,7 @@ QSYM_POINTS = 0.0 0.0 0.0  0.5 0.0 0.0
 
 # Options ...
 WITH_EIGS  = 0
-DEBUG      = 0
+DEBUG      = 1
 
 
 ### Input and output files 
