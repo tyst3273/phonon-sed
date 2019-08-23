@@ -55,21 +55,9 @@ def plot_bands(data,params):
     plt.savefig('example.png',format='png',dpi=300,bbox_inches='tight')
     plt.show()
 
-def plot_slice(data,params):
-    sed_avg = data.sed_avg
-    qpoints = data.qpoints
-    thz = data.thz
-    q_slice = params.q_slice
 
-    log = True
 
-    df = 2
-    freqs = np.arange(0,thz.max(),df)
-    nf = len(freqs)
-    ids = np.zeros(nf)
-    for i in range(nf):
-        ids[i] = np.argwhere(thz <= freqs[i]).max()
-
+def find_nearest(qpoints,q_slice):
     nearest = ['','','']
     nearest[0] = min(qpoints[:,0], key=lambda x:abs(x-q_slice[0]))
     inds = np.argwhere(qpoints[:,0] == nearest[0]).flatten()
@@ -89,6 +77,27 @@ def plot_slice(data,params):
             inds = np.intersect1d(inds,inds2)
             q_ind = inds[0]
     nearest = qpoints[q_ind,:]
+    return nearest, q_ind
+
+def lorentzian(xarr,center,amplitude,hwhm):
+            return amplitude/(1+((xarr-center)/hwhm)**2)
+
+def plot_slice(data,params):
+    sed_avg = data.sed_avg
+    qpoints = data.qpoints
+    thz = data.thz
+    q_slice = params.q_slice
+
+    log = True
+
+    df = 2
+    freqs = np.arange(0,thz.max(),df)
+    nf = len(freqs)
+    ids = np.zeros(nf)
+    for i in range(nf):
+        ids[i] = np.argwhere(thz <= freqs[i]).max()
+
+    nearest, q_ind = find_nearest(qpoints,q_slice)
 
     ### creat a figure, set its size
     fig, ax = plt.subplots()
@@ -102,9 +111,32 @@ def plot_slice(data,params):
     if log:
         ax.semilogy(sed_avg[:,q_ind],ls='-',lw=1,color='k',
                 marker='o',ms=2,mfc='b',mec='k',mew=1)
+        if params.plot_lorentz:
+            total = np.zeros(len(sed_avg[:,q_ind]))
+            for i in range(len(params.popt[:,0])):
+                start = params.bounds[i,0]
+                end = params.bounds[i,1]
+                ax.semilogy(lorentzian(np.arange(len(sed_avg[:,q_ind])),
+                    params.popt[i,0],params.popt[i,1],params.popt[i,2]),
+                    ls='-',lw=1,marker='o',mfc='r',mec='r',ms=1,mew=0,color='r')
+                total = total+(lorentzian(np.arange(len(sed_avg[:,q_ind])),
+                    params.popt[i,0],params.popt[i,1],params.popt[i,2]))
+            ax.semilogy(total,ls='-',lw=1,marker='o',mfc='b',mec='b',ms=1,mew=0,color='b')
+
     else:
         ax.plot(sed_avg[:,q_ind],ls='-',lw=1,color='k',
                 marker='o',ms=2,mfc='b',mec='k',mew=1)
+        if params.plot_lorentz:
+            total = np.zeros(len(sed_avg[:,q_ind]))
+            for i in range(len(params.popt[:,0])): 
+                start = params.bounds[i,0]
+                end = params.bounds[i,1]
+                ax.plot(lorentzian(np.arange(len(sed_avg[:,q_ind])),
+                    params.popt[i,0],params.popt[i,1],params.popt[i,2]),
+                    ls='-',lw=1,marker='o',mfc='r',mec='r',ms=1,mew=0,color='r')
+                total = total+(lorentzian(np.arange(len(sed_avg[:,q_ind])),
+                    params.popt[i,0],params.popt[i,1],params.popt[i,2]))
+            ax.plot(total,ls='-',lw=1,marker='o',mfc='b',mec='b',ms=1,mew=0,color='b')
 
 #    ax.set_xticks(ids)
 #    ax.set_xticklabels(list(map(str,freqs)))

@@ -36,3 +36,6 @@ class read_previous:
             self.qpoints = np.loadtxt(params.out_prefix+'.Qpts')
             self.thz = np.loadtxt(params.out_prefix+'.THz')
 
+def write_lorentz(lorentz,params):
+    np.savetxt(params.out_prefix+'_LORENTZ-FIT-{}.params'.format(lorentz.q_ind),
+            lorentz.popt,fmt='%12f')

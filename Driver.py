@@ -30,9 +30,7 @@ if params.plot_bands:
 if params.plot_slice:
     data = FileIO.read_previous(params)
     Plot.plot_slice(data,params)
-    if not params.lorentz:
-        print('\nALL DONE!\n')
-        exit()
+    exit()
 if params.lorentz:
     data = FileIO.read_previous(params)
     Lorentz.lorentz(data,params)

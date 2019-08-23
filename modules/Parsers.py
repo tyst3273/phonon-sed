@@ -28,6 +28,7 @@ class parse_input:
         self.lattice_file = 'lattice.dat'
         self.database_file = 'dat.hdf5'
         self.file_format = 'xyz'
+        self.plot_lorentz = False
 
         self.input_file = input_file
         input_txt = open(input_file,'r').readlines()
