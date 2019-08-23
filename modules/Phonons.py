@@ -1,3 +1,28 @@
+"""
+To avoid a horrible mess of indentations, I broke this up into internal methods 
+that the spectral_energy_density class calls on its self. The basic outline is as
+follows (see ... for the formulation)
+1. Loop over 'splits' (i.e. blocks of data for block averaging)
+    read in the vels. and pos. for each split (time average the pos. to get a 
+    constant position). Data reading is done in an other method.
+    2. Loop over q-points (have to do FT at each q-point)
+        3. Loop over basis atoms
+            The sum over FT'ed vx-vy-vz and over all basis atoms is taken care of 
+            in loop '3'
+
+Development notes:
+    FFT's aren't scaled properly and neither is the sed where the qdots are 
+    divided by 4*pi*....
+
+    FFT's need scaled to be unitary, i.e. same total energy in freq. and time 
+    domains. It's just a part of the conventional way the FFT is calculated
+
+    I can easily add phonon-DoS calculation to this!
+
+    Should I time average the atomic positions to get the unit-cell coord? 
+    Or do some other fancy math? I am time averaging right-now ...
+"""
+
 import numpy as np
 
 class spectral_energy_density:
@@ -9,38 +34,14 @@ class spectral_energy_density:
         self.thz = (np.arange(self.steps_per_split)/
                 (self.steps_per_split*params.time_step*params.stride)/1e12)
 
+
     def construct_splits(self,params):
         self.reduced_steps = params.num_steps//params.stride
         self.steps_per_split = self.reduced_steps//params.num_splits
 
+
     def compute_sed(self,params,lattice,eigen_vectors):
-        """
-        To avoid a horrible mess of indentations, I broke this up into internal methods 
-        that the spectral_energy_density class calls on its self. The basic outline is as
-        follows (see ... for the formulation)
-        1. Loop over 'splits' (i.e. blocks of data for block averaging)
-            read in the vels. and pos. for each split (time average the pos. to get a 
-            constant position). Data reading is done in an other method.
-            2. Loop over q-points (have to do FT at each q-point)
-                3. Loop over basis atoms
-                    The sum over FT'ed vx-vy-vz and over all basis atoms is taken care of 
-                    in loop '3'
-
-        Development notes:
-            FFT's aren't scaled properly and neither is the sed where the qdots are 
-            divided by 4*pi*....
-            FFT's need scaled to be unitary, i.e. same total energy in freq. and time 
-            domains. It's just a part of the conventional way the FFT is calculated
-
-            I can easily add phonon-DoS calculation to this!
-
-            Should I time average the atomic positions to get the unit-cell coord? 
-            Or do some other fancy math? I am time averaging right-now ...
-        """
-
-        #### DEV ####
-        print('\nDEV NOTE: the FFT\'s aren\'t properly scaled yet!\n')
-        #### DEV ####
+        print('\nDEV NOTE: the FFT\'s aren\'t properly scaled yet!\n')  # dev
 
         self.num_unit_cells = lattice.unit_cells.max()
         self.num_basis = lattice.basis_pos.max()
