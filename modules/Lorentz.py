@@ -3,12 +3,17 @@ from scipy.optimize import leastsq
 
 class lorentz:
     def __init__(self,data,params):
+
+        def lorentzian(xarr,amp,peak_pos,hwhm):
+            return amp/(1+((xarr-peak_pos)/hwhm)**2)
+
         self.find_nearest(data,params)
         self.sed = data.sed_avg[:,self.q_ind]
-#        self.find_peaks(data)
-    
-#    def find_peaks(self,data,params):
-        
+
+        num_x = len(self.sed)
+        xarr = np.arange(0,num_x)
+
+#        for i in range(len(params.peak_guesses)):
 
 
     def find_nearest(self,data,params):

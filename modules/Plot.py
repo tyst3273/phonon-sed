@@ -114,12 +114,12 @@ def plot_slice(data,params):
     ax.tick_params(which='major', length=5)
     ax.tick_params(which='minor', length=3, color='k')
 #    plt.tick_params(axis='x',which='both',labelbottom=False)
-    ax.set_ylabel(r'$\Phi$($\omega)$',labelpad=30.0,fontweight='normal',
+    ax.set_ylabel(r'log($\Phi$($\omega)$)',labelpad=35.0,fontweight='normal',
             fontsize='x-large',rotation='horizontal')
     ax.set_xlabel('Index',labelpad=3.0,fontweight='normal',fontsize='large')
 #    ax.set_xlabel(r'$\omega$ (THz)',labelpad=3.0,fontweight='normal',fontsize='large')
-    fig.suptitle(r'$\bfq$=({}, {}, {}), log-scale={}'
-            .format(nearest[0],nearest[1],nearest[2],log),y=0.80,fontsize='x-large')
+    fig.suptitle(r'$\bfq$=({}, {}, {})'
+            .format(nearest[0],nearest[1],nearest[2]),y=0.80,fontsize='x-large')
 
     #plt.savefig('example.png',format='png',dpi=300,bbox_inches='tight')
     plt.show()

@@ -14,6 +14,8 @@ def write_output(phonons,params,lattice,eigen_vectors):
         for i in range(len(phonons.sed_bands_avg[:,0,0])):
             np.savetxt(params.out_prefix+'_BAND-{}.pSED'
                     .format(i+1),phonons.sed_bands_avg[i,:,:],fmt='%.6f')
+        np.savetxt(params.out_prefix+'_BAND-PHONOPY.disp',eigen_vectors.freq,
+                fmt='%.6f')
 
 class read_previous:
     def __init__(self,params):
@@ -26,6 +28,8 @@ class read_previous:
 #            self.pdos =  np.loadtxt(params.out_prefix+'.PDoS')
             self.qpoints = np.loadtxt(params.out_prefix+'.Qpts')
             self.thz = np.loadtxt(params.out_prefix+'.THz')
+            self.phonopy = np.loadtxt(params.out_prefix+'_BAND-PHONOPY.disp')
+
         else:
             self.sed_avg = np.loadtxt(params.out_prefix+'.pSED')
 #            self.pdos =  np.loadtxt(params.out_prefix+'.PDoS')

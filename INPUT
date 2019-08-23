@@ -1,14 +1,14 @@
 ### Post-processing and plotting
 # Read previous calculation for plotting
 PLOT_BANDS   = 1
-BAND_TO_PLOT = 0
+BAND_TO_PLOT = 19
 PLOT_SLICE   = 1
 Q_SLICE      = 0.25 0.0 0.0 
 
 # Do Lorentz fitting
 LORENTZ      = 0
-NUM_GUESSES  = 10
-PEAK_GUESSES = 101 146 316 348 503 584 674 739 781 784
+NUM_GUESSES  = 1
+PEAK_GUESSES = 741
 
 
 ### Phonon SED calculation
