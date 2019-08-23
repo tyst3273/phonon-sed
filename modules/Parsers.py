@@ -219,6 +219,8 @@ class parse_input:
                 print('\nERROR: option {} not recognized\n'.format(txt[0]))
 #                exit()
 
+
+
 def parse_lattice_file(params):
 
         # read the lattice info from a file
@@ -233,31 +235,40 @@ def parse_lattice_file(params):
 
         return atom_ids, unit_cells, basis_pos, masses
 
+
 class parse_eigen_vecs:
     def __init__(self,params):
-        if params.with_eigs:
+        if params.with_eigs: # if WITH_EIGS = 1 in input file
             phonopy_data = yaml.load(open(params.eigvecs_file),Loader=Loader)
-
+            
+            # data from the phonopy output file
             self.natom = phonopy_data['natom']
             self.num_qpoints = phonopy_data['nqpoint']
             self.qpoints = np.zeros((self.num_qpoints,3))
 
+            # incase the order of basis atoms in phonopy don't match
             if len(params.basis_list) == 0:
                 basis_slice = np.arange(self.natom)
             else:
                 basis_slice = sorted(params.basis_list)
                 for i in range(len(basis_slice)):
                     basis_slice[i] = basis_slice[i]-1
-    
+        
+            # dispersions from phonopy
             self.freq = np.zeros((self.num_qpoints,self.natom*3))
             self.eig_vecs = np.zeros((self.num_qpoints,self.natom*3,
                 self.natom,3)).astype(complex)
 
+            # look up the eigenvectors
             for i in range(self.num_qpoints):
+                # loop over q-points
                 self.qpoints[i,:] = phonopy_data['phonon'][i]['q-position']
 
+                # loop over bands
                 for j in range(self.natom*3):
                     self.freq[i][j] = phonopy_data['phonon'][i]['band'][j]['frequency']
+
+                    # loop over basis atoms
                     for ind in basis_slice:
                             self.eig_vecs[i,j,ind,0] = (
                         phonopy_data['phonon'][i]['band'][j]['eigenvector'][ind][0][0]+
@@ -271,8 +282,8 @@ class parse_eigen_vecs:
                         phonopy_data['phonon'][i]['band'][j]['eigenvector'][ind][2][0]+
                         1j*phonopy_data['phonon'][i]['band'][j]['eigenvector'][ind][2][1]
                             )
-        else:
-            self.eig_vecs = []
 
+        else: # intialize empty array 
+            self.eig_vecs = []
 
 

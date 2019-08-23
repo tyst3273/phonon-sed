@@ -3,6 +3,7 @@ import numpy as np
 import os
 
 def compress(params):
+    # check if files exist
     if not os.path.exists(params.vels_file):
                     print('\nERROR: file {} not found\n'.format(params.vels_file))
                     exit()
@@ -15,16 +16,16 @@ def compress(params):
 
     if params.file_format == 'xyz':
 
-        #### DEV ####
         print('\nDEV NOTE: before this routine can be used with \'xyz\', it needs to be\n'
                 'modified such that it only saves the steps selected by the stride\n')
-        exit()
-        #### DEV ####
+        exit() # dev
 
+        # write to hdf5 database file
         with h5py.File(params.database_file,'w') as fout:
-            with open(params.vels_file,'r') as fin:
+            with open(params.vels_file,'r') as fin: # velocities
                 vels_dset = fout.create_dataset('vels',
                         (params.num_steps,params.num_atoms,3))
+                # look them up in .xyz file
                 for i in range(params.num_steps):
                     vels = np.zeros((params.num_atoms,3))
                     for j in range(2):
@@ -32,9 +33,11 @@ def compress(params):
                     for j in range(params.num_atoms):
                        vels[j,:] = fin.readline().strip().split()[1:]
                     vels_dset[i,:,:] = vels
-            with open(params.pos_file,'r') as fin:
+
+            with open(params.pos_file,'r') as fin: # positions
                 pos_dset = fout.create_dataset('pos',
                         (params.num_steps,params.num_atoms,3))
+                # look them up in .xyz file
                 for i in range(params.num_steps):
                     pos = np.zeros((params.num_atoms,3))
                     for j in range(2):
@@ -44,10 +47,12 @@ def compress(params):
                     pos_dset[i,:,:] = pos
 
     elif params.file_format == 'lammps':
-        num_steps = params.num_steps//params.stride
+        # write to hdf5 database
+        num_steps = params.num_steps//params.stride # number of times actually printed
         with h5py.File(params.database_file,'w') as fout:
-            with open(params.vels_file,'r') as fin:
+            with open(params.vels_file,'r') as fin: # vels
                 vels_dset = fout.create_dataset('vels',(num_steps,params.num_atoms,3))
+                # look them up in lammps output file
                 for i in range(num_steps):
                     vels = np.zeros((params.num_atoms,3))
                     for j in range(9):
@@ -55,8 +60,9 @@ def compress(params):
                     for j in range(params.num_atoms):
                        vels[j,:] = fin.readline().strip().split()[2:]
                     vels_dset[i,:,:] = vels
-            with open(params.pos_file,'r') as fin:
+            with open(params.pos_file,'r') as fin: # pos
                 pos_dset = fout.create_dataset('pos',(num_steps,params.num_atoms,3))
+                # look them up in lammps output file
                 for i in range(num_steps):
                     pos = np.zeros((params.num_atoms,3))
                     for j in range(9):

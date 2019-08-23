@@ -1,15 +1,4 @@
 """
-To avoid a horrible mess of indentations, I broke this up into internal methods 
-that the spectral_energy_density class calls on its self. The basic outline is as
-follows (see ... for the formulation)
-1. Loop over 'splits' (i.e. blocks of data for block averaging)
-    read in the vels. and pos. for each split (time average the pos. to get a 
-    constant position). Data reading is done in an other method.
-    2. Loop over q-points (have to do FT at each q-point)
-        3. Loop over basis atoms
-            The sum over FT'ed vx-vy-vz and over all basis atoms is taken care of 
-            in loop '3'
-
 Development notes:
     FFT's aren't scaled properly and neither is the sed where the qdots are 
     divided by 4*pi*....
@@ -130,26 +119,30 @@ class spectral_energy_density:
     def band_loop_with_eigs(self,params,lattice,eigen_vectors):
         for b in range(eigen_vectors.natom*3): # loop over bands
             print('\t\tband {} out of {}'.format(b+1,self.num_basis*3))
-            self.qdot = np.zeros(self.steps_per_split)
+            self.qdot = np.zeros(self.steps_per_split).astype(complex)
             self.band_index = b
             self.ex = eigen_vectors.eig_vecs[self.q_index,b,:,0]
             self.ey = eigen_vectors.eig_vecs[self.q_index,b,:,1]
             self.ez = eigen_vectors.eig_vecs[self.q_index,b,:,2]
             self.basis_loop_with_eigs(params,lattice)
-            self.sed_bands[self.loop_index,b,:,self.q_index] = self.qdot/(4*np.pi) # scale
+            self.sed_bands[self.loop_index,b,:,self.q_index] = abs(
+                    np.fft.fft(self.qdot))**2 # scale
     def basis_loop_with_eigs(self,params,lattice):
         for i in range(self.num_basis):
             basis_ids = np.argwhere(lattice.basis_pos == (i+1)).reshape(
                     self.num_unit_cells)
             mass = lattice.masses[i]
-            vels = self.exp_fac*(self.ex[i].conj()*self.vels[:,basis_ids,0]
-                    .reshape(self.steps_per_split,self.num_unit_cells)+
-                    self.ey[i].conj()*self.vels[:,basis_ids,1]
-                    .reshape(self.steps_per_split,self.num_unit_cells)+
-                    self.ez[i].conj()*self.vels[:,basis_ids,2]
-                    .reshape(self.steps_per_split,self.num_unit_cells)) # scale
-            self.qdot[:] = (self.qdot[:]+(abs(vels.sum(axis=1))**2)
-                    /self.num_unit_cells*mass) # scale
+            vx = ((self.exp_fac*self.vels[:,basis_ids,0]
+                    .reshape(self.steps_per_split,self.num_unit_cells))
+                    .sum(axis=1)) #.astype(complex)
+            vy = ((self.exp_fac*self.vels[:,basis_ids,1]
+                    .reshape(self.steps_per_split,self.num_unit_cells))
+                    .sum(axis=1)) #.astype(complex)
+            vz = ((self.exp_fac*self.vels[:,basis_ids,2]
+                    .reshape(self.steps_per_split,self.num_unit_cells))
+                    .sum(axis=1)) #.astype(complex)
+            self.qdot[:] = (self.qdot[:]+(vx*self.ex[i].conj()+vy*self.ey[i].conj()+
+                vz*self.ez[i].conj())/self.num_unit_cells*mass) # scale
 
 
     ##################################################################

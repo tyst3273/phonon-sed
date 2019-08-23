@@ -19,7 +19,7 @@ TIME_STEP = 0.75    # femtoseconds
 
 # Divide up the data for averaging
 STRIDE     = 32 # data only printed every 32 steps in my LAMMPS simulation
-NUM_SPLITS = 32
+NUM_SPLITS = 16
 
 # Crystal lattice
 LAT_PARAMS = 5.431 5.431 5.431
@@ -31,8 +31,8 @@ NUM_QPOINTS = 12  # number of q-points in the disperion paths
 QSYM_POINTS = 0.0 0.0 0.0  0.5 0.0 0.0
 
 # Options ...
-WITH_EIGS  = 0
-DEBUG      = 1
+WITH_EIGS  = 1
+DEBUG      = 0
 
 
 ### Input and output files 
