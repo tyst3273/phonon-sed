@@ -1,0 +1,89 @@
+#!/usr/bin/env python3
+
+# python modules
+import sys
+import os
+import numpy as np
+import h5py
+
+# add my modules to path
+modulepath = '/home/ty/python_modules/sed_modules'
+sys.path.append(modulepath)
+
+# my modules
+import Parsers
+import Compressor
+import Lattice
+import Phonons
+import FileIO
+import Plot
+import Lorentz
+
+### Get the input file
+if len(sys.argv) == 1:
+    input_file = 'INPUT'
+elif len(sys.argv) > 2:
+    print('\nERROR: ./pSED takes 1 or 0 arguments!'
+            '\nTry \'./pSED help\' for more info.\n')
+    exit()  
+elif len(sys.argv) == 2 and (sys.argv[1] == 'h' or sys.argv[1] == 'help' or 
+        sys.argv[1] == 'HELP' or sys.argv[1] == '-h' or sys.argv[1] == '--help' or 
+        sys.argv[1] == '--HELP'):
+    print('\nUSAGE: ./pSED [input_file]\n\n\'input_file\' should be the name of the file '
+        'containing the parameters \nto calculate the phonon spectral energy density'
+        '\n\nIf no input_file name is given, the default is \'INPUT\'\n')
+    exit()
+else: 
+    input_file = str(sys.argv[1])
+if not os.path.exists(input_file):
+    print('\nERROR: file \'{}\' not found!\n'.format(input_file))
+    exit()
+
+
+
+############################################################
+
+
+
+params = Parsers.parse_input(input_file)
+
+### Plot the stuff
+if params.plot_bands:
+    data = FileIO.read_previous(params)
+    Plot.plot_bands(data,params)
+    if not params.plot_slice:
+        print('\nALL DONE!\n')
+        exit()
+if params.plot_slice:
+    data = FileIO.read_previous(params)
+    Plot.plot_slice(data,params)
+    exit()
+
+### Fit to a Lorentz function
+if params.lorentz:
+    data = FileIO.read_previous(params)
+    Lorentz.lorentz(data,params)
+    print('\nALL DONE!\n')
+    exit()
+
+### Compress the velocity and position data to hdf5
+if params.compress:
+    Compressor.compress(params)
+    print('\nALL DONE!\n')
+    exit()
+
+### Read the data from hdf5
+params.database = h5py.File(params.database_file,'r')
+
+### Read the PHONOPY and lattice structure data
+eigen_vectors = Parsers.parse_eigen_vecs(params)
+lattice = Lattice.lattice(params,eigen_vectors)
+
+### Compute the SED
+phonons = Phonons.spectral_energy_density(params)
+phonons.compute_sed(params,lattice,eigen_vectors)
+
+### Save the data to output files
+FileIO.write_output(phonons,params,lattice,eigen_vectors)
+
+print('\nALL DONE!\n')
