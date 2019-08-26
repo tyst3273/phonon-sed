@@ -20,7 +20,7 @@ class parse_input:
         self.with_eigs = False
         self.num_basis = 0
         self.basis_list = []
-        self.slice = [0.0, 0.0, 0.0]
+        self.q_slice_index = 0
         self.num_bins = 1
         self.out_prefix = 'last-run'
         self.vels_file = 'vels.dat'
@@ -151,11 +151,11 @@ class parse_input:
                     self.plot_slice = bool(int(txt[txt.index('=')+1]))
                 except:
                     print_error('PLOT_SLICE')
-            elif txt[0] == 'Q_SLICE':
+            elif txt[0] == 'Q_SLICE_INDEX':
                 try:
-                    self.q_slice = list(map(float,txt[txt.index('=')+1:txt.index('=')+4]))
+                    self.q_slice_index = int(txt[txt.index('=')+1])
                 except:
-                    print_error('Q_SLICE')
+                    print_error('Q_SLICE_INDEX')
             elif txt[0] == 'NUM_BINS':
                 try:
                     self.num_bins = int(txt[txt.index('=')+1]) 

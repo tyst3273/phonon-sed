@@ -40,11 +40,7 @@ if not os.path.exists(input_file):
     exit()
 
 
-
-############################################################
-
-
-
+### Read the input parameter file
 params = Parsers.parse_input(input_file)
 
 ### Plot the stuff

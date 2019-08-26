@@ -1,14 +1,18 @@
 ### Post-processing and plotting
 # Read previous calculation for plotting
-PLOT_BANDS   = 0
-BAND_TO_PLOT = 19
-PLOT_SLICE   = 0
-Q_SLICE      = 0.25 0.0 0.0 
+PLOT_BANDS    = 0
+BAND_TO_PLOT  = 0
+PLOT_SLICE    = 0
+Q_SLICE_INDEX = 3
 
 # Do Lorentz fitting
 LORENTZ      = 1
-NUM_GUESSES  = 3
-PEAK_GUESSES = 352 578 741
+NUM_GUESSES  = 9
+PEAK_GUESSES = 122 176 658 682 1088 1186 1292 1470 1573
+
+# Options ...
+WITH_EIGS  = 0
+DEBUG      = 0
 
 
 ### Phonon SED calculation
@@ -19,7 +23,7 @@ TIME_STEP = 0.75    # femtoseconds
 
 # Divide up the data for averaging
 STRIDE     = 32 # data only printed every 32 steps in my LAMMPS simulation
-NUM_SPLITS = 16
+NUM_SPLITS = 8
 
 # Crystal lattice
 LAT_PARAMS = 5.431 5.431 5.431
@@ -29,11 +33,6 @@ PRIM_VECS  = 1.0 0.0 0.0  0.0 1.0 0.0  0.0 0.0 1.0
 NUM_QPATHS  = 1   # number of dispersion paths to include
 NUM_QPOINTS = 12  # number of q-points in the disperion paths
 QSYM_POINTS = 0.0 0.0 0.0  0.5 0.0 0.0
-
-# Options ...
-WITH_EIGS  = 1
-DEBUG      = 0
-
 
 ### Input and output files 
 # File names

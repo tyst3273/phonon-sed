@@ -37,5 +37,7 @@ class read_previous:
             self.thz = np.loadtxt(params.out_prefix+'.THz')
 
 def write_lorentz(lorentz,params):
-    np.savetxt(params.out_prefix+'_LORENTZ-FIT-{}.params'.format(lorentz.q_ind),
+    np.savetxt(params.out_prefix+'_LORENTZ-{}.params'.format(params.q_slice_index),
             lorentz.popt,fmt='%12f')
+    np.savetxt(params.out_prefix+'_LORENTZ-{}.error'.format(params.q_slice_index),
+            lorentz.pcov,fmt='%12f')

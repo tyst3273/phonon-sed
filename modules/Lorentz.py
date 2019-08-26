@@ -9,18 +9,20 @@ class lorentz:
         def lorentzian(xarr,center,amplitude,hwhm):
             return amplitude/(1+((xarr-center)/hwhm)**2)
 
-        self.find_nearest(data,params)
+        self.q_ind = params.q_slice_index
         self.sed = data.sed_avg[:,self.q_ind]
 
         dx = 10
-        dxarr = 50
-        maxfev = 1e6
+        dxarr = 100
+        maxfev = 1e4
 
         self.xarr = np.arange(len(self.sed))
         self.popt = np.zeros((params.num_guesses,3))
+        self.pcov = np.zeros((params.num_guesses,3))
         params.bounds = np.zeros((params.num_guesses,2))
 
         for i in range(params.num_guesses):
+
             if params.peak_guesses[i]-dxarr < 0:
                 start = 0
             else:
@@ -34,11 +36,17 @@ class lorentz:
             lb = [params.peak_guesses[i]-dx,1e-6,1e-10]
             ub = [params.peak_guesses[i]+dx,np.inf,1e3]
 
-            self.popt[i,:], pcov = curve_fit(lorentzian,
-                    self.xarr[start:end],
-                    self.sed[start:end],
-                    p0=[params.peak_guesses[i],self.sed[params.peak_guesses[i]],1],
-                    bounds=(lb,ub),maxfev=maxfev)
+            try:
+                self.popt[i,:], pcov = curve_fit(lorentzian,
+                        self.xarr[start:end],
+                        self.sed[start:end],
+                        p0=[params.peak_guesses[i],self.sed[params.peak_guesses[i]],1],
+                        bounds=(lb,ub),maxfev=maxfev)
+                self.pcov[i,:] = np.sqrt(np.diag(pcov))
+            except:
+                print('\nWARNING: Lorentz fit for peak-guess-index {} failed!\n'
+                        .format(params.peak_guesses[i]))
+                continue
         
         FileIO.write_lorentz(self,params)
 
@@ -46,28 +54,3 @@ class lorentz:
         params.plot_lorentz = True
         Plot.plot_slice(data,params)
 
-
-    def find_nearest(self,data,params):
-        nearest = ['','','']
-        nearest[0] = min(data.qpoints[:,0], key=lambda x:abs(x-params.q_slice[0]))
-        inds = np.argwhere(data.qpoints[:,0] == nearest[0]).flatten()
-        if len(inds) == 1:
-            q_ind = inds[0]
-        else:
-            qpt_slice = data.qpoints[inds,:]
-            nearest[1] = min(qpt_slice[:,1], key=lambda x:abs(x-params.q_slice[1]))
-            inds2 = np.argwhere(data.qpoints[:,1] == nearest[1]).flatten()
-            inds = np.intersect1d(inds,inds2)
-            if len(inds) == 1:
-                q_ind = inds[0]
-            else:
-                qpt_slice = data.qpoints[inds,:]
-                nearest[2] = min(qpt_slice[:,2], key=lambda x:abs(x-params.q_slice[2]))
-                inds2 = np.argwhere(data.qpoints[:,2] == nearest[2]).flatten()
-                inds = np.intersect1d(inds,inds2)
-                q_ind = inds[0]
-        self.nearest = data.qpoints[q_ind,:]
-        self.q_ind = q_ind
-
-        
-        
