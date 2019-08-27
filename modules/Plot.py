@@ -99,7 +99,7 @@ def plot_slice(data,params):
                     ls='-',lw=1,marker='o',mfc='r',mec='r',ms=1,mew=0,color='r')
                 total = total+(lorentzian(np.arange(len(sed_avg[:,q_ind])),
                     params.popt[i,0],params.popt[i,1],params.popt[i,2]))
-            ax.semilogy(total,ls='-',lw=0.5,0marker='o',
+            ax.semilogy(total,ls='-',lw=0.5,marker='o',
                     mfc='b',mec='b',ms=0.5,mew=0,color='b')
 
     else:
