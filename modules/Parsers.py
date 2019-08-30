@@ -199,9 +199,9 @@ class parse_input:
                     self.lattice_file = str(txt[txt.index('=')+1].strip('\''))
                 except:
                     print_error('LATTICE_FILE')
-                if not os.path.exists(self.lattice_file):
-                    print('\nERROR: file {} not found\n'.format(self.lattice_file))
-                    exit()
+#                if not os.path.exists(self.lattice_file):
+#                    print('\nERROR: file {} not found\n'.format(self.lattice_file))
+#                    exit()
             elif txt[0] == 'OUT_PREFIX':
                 try:
                     self.out_prefix = str(txt[txt.index('=')+1].strip('\''))
@@ -224,6 +224,10 @@ class parse_input:
 
 
 def parse_lattice_file(params):
+        if not os.path.exists(params.lattice_file):
+            print('\nERROR: file {} not found\n'.format(self.lattice_file))
+            exit()
+
 
         # read the lattice info from a file
         atom_ids, unit_cells, basis_pos, masses = np.loadtxt(
