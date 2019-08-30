@@ -6,41 +6,40 @@ PLOT_SLICE    = 0
 Q_SLICE_INDEX = 1
 
 # Do Lorentz fitting
-LORENTZ      = 1
-NUM_GUESSES  = 9
-PEAK_GUESSES = 41 59 672 675 1163 1196 1231 1465 1576
+LORENTZ      = 0
+NUM_GUESSES  = 0  # Number of guesses for peak centers
+PEAK_GUESSES = 1  # Index of peak center from 'plot_slice' plot
 
 # Options ...
 WITH_EIGS  = 0
 DEBUG      = 0
-
+COMPRESS   = 0
 
 ### Phonon SED calculation
 # Simulation parameters
-NUM_ATOMS = 3072 
+NUM_ATOMS = 1920
 NUM_STEPS = 1048576 # MD simulation steps
-TIME_STEP = 0.75    # femtoseconds
+TIME_STEP = 0.5     # femtoseconds
 
 # Divide up the data for averaging
-STRIDE     = 32 # data only printed every 32 steps in my LAMMPS simulation
-NUM_SPLITS = 8
+STRIDE     = 16 # data only printed every 32 steps in my LAMMPS simulation
+NUM_SPLITS = 1
 
 # Crystal lattice
-LAT_PARAMS = 5.431 5.431 5.431
+LAT_PARAMS = 14.0235 14.0235 14.0235
 PRIM_VECS  = 1.0 0.0 0.0  0.0 1.0 0.0  0.0 0.0 1.0
 
 # Q-points
 NUM_QPATHS  = 1   # number of dispersion paths to include
-NUM_QPOINTS = 12  # number of q-points in the disperion paths
-QSYM_POINTS = 0.0 0.0 0.0  0.5 0.0 0.0
+NUM_QPOINTS = 1   # number of q-points in the disperion paths
+QSYM_POINTS = 0.0 0.0 0.0  0.1 0.0 0.0  
 
 ### Input and output files 
 # File names
-OUT_PREFIX   = 'cubic-si'
+OUT_PREFIX   = 'cubic-c60'
 LATTICE_FILE = 'lattice.dat'
 EIGVECS_FILE = 'band.yaml' 
 VELS_FILE    = 'vels.dat'
 POS_FILE     = 'pos.dat'
 FILE_FORMAT  = 'lammps'
-COMPRESS     = 0
 
