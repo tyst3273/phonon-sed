@@ -11,7 +11,8 @@ class spectral_energy_density:
     def compute_sed(self,params,lattice,eigen_vectors):
         # note that velocites are in Ang/ps
 
-        print('\nDEV NOTE: the FFT\'s aren\'t properly scaled yet!\n')  # dev
+        print('\nWARNING: the FFT\'s aren\'t properly scaled yet, and I didn\'t '
+                                                'convert any units!\n')  
 
         self.num_unit_cells = lattice.unit_cells.max()
         self.num_basis = lattice.basis_pos.max()
@@ -129,7 +130,7 @@ class spectral_energy_density:
                 vz*self.ez[n].conj())/self.num_unit_cells*mass) # !!!
 
     ##################################################################
-    ### read vels and pos
+    ### read vels and pos from the hdf5 file
     def get_simulation_data(self,params,lattice):
         self.vels = params.database['vels'][self.loop_index*self.steps_per_split:
                 (self.loop_index+1)*self.steps_per_split,:,:]

@@ -1,45 +1,45 @@
 ### Post-processing and plotting
 # Read previous calculation for plotting
-PLOT_BANDS    = 0
-BAND_TO_PLOT  = 0
-PLOT_SLICE    = 0
-Q_SLICE_INDEX = 1
+# Will look for output files and plot them, then exit.
+PLOT_BANDS    = 0 # plot the dispersion
+PLOT_SLICE    = 0 # plot a q-slice
+Q_SLICE_INDEX = 2 # the q-point to plot (starts from 0 thanks to python slicing...)
 
-# Do Lorentz fitting
-LORENTZ      = 0
-NUM_GUESSES  = 0  # Number of guesses for peak centers
-PEAK_GUESSES = 1  # Index of peak center from 'plot_slice' plot
+### Do Lorentz fitting
+LORENTZ      = 0  # whether to fit peaks
+NUM_GUESSES  = 2  # Number of guesses for peak centers
+PEAK_GUESSES = 956 1400  # Index of peak center from 'plot_slice' plot. Enter as many as there are NUM_GUESSES
 
-# Options ...
-WITH_EIGS  = 0
-DEBUG      = 0
-COMPRESS   = 0
+### Options ...
+DEBUG      = 0 # this will only average one block. Keep as 0 for production
+COMPRESS   = 0 # this will compress the velocity file and exit. Set to 0 to calculate SED.
 
 ### Phonon SED calculation
-# Simulation parameters
-NUM_ATOMS = 1920
-NUM_STEPS = 1048576 # MD simulation steps
-TIME_STEP = 0.5     # femtoseconds
+NUM_ATOMS = 512     # number of atoms in structure
+NUM_STEPS = 2097152 # MD simulation steps
+TIME_STEP = 0.75    # femtoseconds
 
-# Divide up the data for averaging
-STRIDE     = 16 # data only printed every 32 steps in my LAMMPS simulation
-NUM_SPLITS = 1
+### Divide up the data for averaging
+STRIDE     = 32 # data only printed every 32 steps in the LAMMPS simulation, see the input file.
+NUM_SPLITS = 2  # number of blocks to average. If DEBUG = 1, this is overridden as 1.
 
-# Crystal lattice
-LAT_PARAMS = 14.0235 14.0235 14.0235
-PRIM_VECS  = 1.0 0.0 0.0  0.0 1.0 0.0  0.0 0.0 1.0
+### Crystal lattice
+LAT_PARAMS = 5.431 5.431 5.431  # crystal lattice constants. 
+PRIM_VECS  = 1.0 0.0 0.0  0.0 1.0 0.0  0.0 0.0 1.0 # primitive lattice vectors.
 
-# Q-points
-NUM_QPATHS  = 1   # number of dispersion paths to include
-NUM_QPOINTS = 1   # number of q-points in the disperion paths
-QSYM_POINTS = 0.0 0.0 0.0  0.1 0.0 0.0  
+### Q-points
+NUM_QPATHS  = 1  # number of dispersion paths to include
+NUM_QPOINTS = 8  # number of q-points in the disperion paths
+QSYM_POINTS = 0.0 0.0 0.0  0.5 0.0 0.0  # end points of the dispersion path in red. reciprocal coords.
 
 ### Input and output files 
-# File names
-OUT_PREFIX   = 'cubic-c60'
+OUT_PREFIX   = 'si-example'
 LATTICE_FILE = 'lattice.dat'
-EIGVECS_FILE = 'band.yaml' 
-VELS_FILE    = 'vels.dat'
+VELS_FILE    = 'vels.dat' 
 POS_FILE     = 'pos.dat'
-FILE_FORMAT  = 'lammps'
+FILE_FORMAT  = 'lammps' # leave this alone unless you know what you are doing! :)
 
+### Eigenvectors, currently manually disabled inside the code... its broken
+# WITH_EIGS    = 0 
+# EIGVECS_FILE = 'band.yaml' 
+# BAND_TO_PLOT = 0 

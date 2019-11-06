@@ -207,14 +207,14 @@ class parse_input:
                     self.out_prefix = str(txt[txt.index('=')+1].strip('\''))
                 except:
                     print_error('OUT_PREFIX')
-            elif txt[0] == 'EIGVECS_FILE':
-                try:
-                    self.eigvecs_file = str(txt[txt.index('=')+1].strip('\''))
-                except:
-                    print_error('EIGVECS_FILE')
-                if not os.path.exists(self.eigvecs_file):
-                    print('\nERROR: file {} not found\n'.format(self.eigvecs_file))
-                    self.with_eigs = False
+#            elif txt[0] == 'EIGVECS_FILE':
+#                try:
+#                    self.eigvecs_file = str(txt[txt.index('=')+1].strip('\''))
+#                except:
+#                    print_error('EIGVECS_FILE')
+#                if not os.path.exists(self.eigvecs_file):
+#                    print('\nERROR: file {} not found\n'.format(self.eigvecs_file))
+#                    self.with_eigs = False
 #                    exit()
             # unknown options
             else: 
@@ -225,7 +225,7 @@ class parse_input:
 
 def parse_lattice_file(params):
         if not os.path.exists(params.lattice_file):
-            print('\nERROR: file {} not found\n'.format(self.lattice_file))
+            print('\nERROR: file {} not found\n'.format(params.lattice_file))
             exit()
 
 

@@ -12,6 +12,7 @@ class lorentz:
         self.q_ind = params.q_slice_index
         self.sed = data.sed_avg[:,self.q_ind]
 
+        # some bounds on the fitting. Might need to tweak these
         dx = 10
         dxarr = 100
         maxfev = 1e4
