@@ -1,3 +1,9 @@
+# Author
+Ty Sterling, University of Colorado Boulder, Dept. of Physics
+
+# Contact
+ty.sterling@colorado.edu
+
 # pSED
 Python code to calculate the phonon spectral energy density (psed) from molecular dynamics simulations. The executable is pSED and can ran from the command line as ./pSED. For more info, read the included 'manual.pdf' file. 
 
