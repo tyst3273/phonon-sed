@@ -26,7 +26,7 @@ si.lattice_vectors([[ 1, 0, 0],
                     [ 0, 0, 1]],
                     lattice_constants=[5.431,5.431,5.431]) # angstrom
 
-si.replicate([16,2,2]) # size of supercell, here it is 10x2x2
+si.replicate([16,2,2]) # size of supercell, here it is 16x2x2
 
 # si.write_xyz('si.xyz') # xyz file, can use it to plot in VMD
 si.write_lammps('si.lammps') # LAMMPS input file
