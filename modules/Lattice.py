@@ -91,7 +91,13 @@ class structure_maker:
         self.basis_types = np.array(basis_types).astype(str)
         if self.basis_types.shape[0] != self.basis_positions.shape[0]:
             error('Number of atom types must match the number of positions given')
-        self.unique_types = list(np.unique(self.basis_types))
+        self.unique_types = []
+        for atom in basis_types:
+            if atom in self.unique_types:
+                continue
+            else:
+                self.unique_types.append(atom)
+        print(self.unique_types)
         self.num_types = len(self.unique_types)
 
         if masses != False:
